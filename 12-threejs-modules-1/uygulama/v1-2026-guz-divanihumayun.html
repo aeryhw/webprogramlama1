@@ -1,0 +1,1556 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Three.js Notları</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Düzen: üstte sabit bölüm çubuğu; her bölümde solda yapışkan başlık, sağda anlatım ve canlı demo.
+   Renkler Three.js'in eksen renklerinden gelir: x kırmızı, y yeşil, z mavi. */
+:root {
+  --bg: #F2F4F8;
+  --surface: #FFFFFF;
+  --surface-2: #E8ECF4;
+  --ink: #0F1626;
+  --muted: #566074;
+  --line: #D3DAE6;
+  --accent: #3454D1;
+  --on-accent: #FFFFFF;
+  --ax-x: #C62F38;
+  --ax-y: #1B7F50;
+  --ax-z: #3454D1;
+  --ok: #1B7F50;
+  --bad: #C62F38;
+  --stage: #15203A;
+  --stage-ink: #C9D4EE;
+  --stage-line: rgba(201, 212, 238, .07);
+  --sx: #FF7078;
+  --sy: #4CC38A;
+  --sz: #8AA2FF;
+  --code-bg: #111A2E;
+  --code-ink: #DCE4F5;
+  --code-line: #25324F;
+  --code-mute: #8493B5;
+  --tk-s: #9FDDB0;
+  --tk-k: #8FB0FF;
+  --tk-t: #FFC285;
+  --tk-n: #F5A9C6;
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A0F1A;
+    --surface: #111A2B;
+    --surface-2: #18233A;
+    --ink: #E7ECF6;
+    --muted: #94A1BA;
+    --line: #24304A;
+    --accent: #8AA2FF;
+    --on-accent: #0A0F1A;
+    --ax-x: #FF7078;
+    --ax-y: #4CC38A;
+    --ax-z: #8AA2FF;
+    --ok: #4CC38A;
+    --bad: #FF7078;
+    --stage: #070B14;
+    --code-bg: #0C1220;
+    --code-line: #1F2B45;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A0F1A;
+  --surface: #111A2B;
+  --surface-2: #18233A;
+  --ink: #E7ECF6;
+  --muted: #94A1BA;
+  --line: #24304A;
+  --accent: #8AA2FF;
+  --on-accent: #0A0F1A;
+  --ax-x: #FF7078;
+  --ax-y: #4CC38A;
+  --ax-z: #8AA2FF;
+  --ok: #4CC38A;
+  --bad: #FF7078;
+  --stage: #070B14;
+  --code-bg: #0C1220;
+  --code-line: #1F2B45;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+code, kbd { font-family: var(--font-mono); font-size: .875em; }
+p code, li code, td code, dd code, .callout code {
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1152px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Üst çubuk ---------- */
+.site-header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 9;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 28px; padding-block: 8px; }
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem;
+  letter-spacing: -.01em; color: var(--ink); text-decoration: none;
+}
+.brand-mark { width: 26px; height: 26px; flex: none; }
+.brand-mark line { stroke-width: 2.6; stroke-linecap: round; }
+.brand-mark .x { stroke: var(--ax-x); }
+.brand-mark .y { stroke: var(--ax-y); }
+.brand-mark .z { stroke: var(--ax-z); }
+.toc { display: flex; gap: 2px; overflow-x: auto; flex: 1 1 340px; min-width: 0; scrollbar-width: none; }
+.toc::-webkit-scrollbar { display: none; }
+.toc a {
+  white-space: nowrap; padding: 8px 10px; font-size: .875rem;
+  color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent;
+}
+.toc a:hover { color: var(--ink); }
+.toc a[aria-current="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ---------- Kahraman alanı ---------- */
+.hero { display: grid; gap: 32px; align-items: center; padding-block: 44px 28px; }
+@media (min-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; padding-block: 64px 36px; }
+}
+.eyebrow {
+  font-family: var(--font-mono); font-size: .75rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+}
+h1 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(2.5rem, 6.2vw, 4.2rem); line-height: 1.02; letter-spacing: -.028em;
+  margin: 14px 0 18px; text-wrap: balance;
+}
+.lead { font-size: 1.125rem; max-width: 54ch; margin: 0; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.btn {
+  display: inline-block; padding: 10px 16px; border-radius: 4px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: .9375rem; text-decoration: none;
+}
+.btn.ghost { background: transparent; color: var(--accent); }
+
+/* ---------- Bölümler ---------- */
+.chapter { display: grid; gap: 20px; padding-block: 56px; border-top: 1px solid var(--line); }
+@media (min-width: 1000px) {
+  .chapter { grid-template-columns: 200px minmax(0, 1fr); gap: 48px; }
+  .chapter-head { position: sticky; top: 92px; align-self: start; }
+}
+.chapter-no {
+  font-family: var(--font-mono); font-size: .75rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+}
+h2 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem); line-height: 1.1; letter-spacing: -.02em;
+  margin: 6px 0 4px; text-wrap: balance;
+}
+.chapter-kicker { margin: 0; font-family: var(--font-mono); font-size: .8125rem; color: var(--accent); }
+h3 {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.25;
+  letter-spacing: -.01em; margin: 12px 0 0; text-wrap: balance;
+}
+.chapter-body { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.chapter-body > * { margin: 0; }
+.chapter-body > h3 { margin-top: 14px; }
+.prose { max-width: 68ch; }
+.prose + .prose { margin-top: -6px; }
+.muted { color: var(--muted); }
+
+.callout {
+  max-width: 68ch; padding: 14px 16px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 4px; font-size: .9375rem;
+}
+.callout .tag {
+  display: block; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+
+dl.params { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; max-width: 68ch; margin: 0; }
+dl.params dt { font-family: var(--font-mono); font-size: .875rem; font-weight: 500; color: var(--accent); }
+dl.params dd { margin: 0; }
+@media (max-width: 520px) { dl.params { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.params dd { margin-bottom: 10px; } }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 540px; font-size: .9375rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+
+/* ---------- Sekmeler ---------- */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  font: 500 .875rem var(--font-body); padding: 8px 14px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.tabpanel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.tabpanel > * { margin: 0; }
+
+/* ---------- Kod blokları ---------- */
+.code { margin: 0; background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--code-line); border-radius: 6px; min-width: 0; }
+.code figcaption {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--code-line);
+  font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--code-mute);
+}
+.copy {
+  font: 500 .75rem var(--font-body); padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  background: transparent; color: var(--code-ink); border: 1px solid var(--code-line);
+}
+.copy:hover { border-color: var(--code-mute); }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 400 .8125rem/1.65 var(--font-mono); tab-size: 2; }
+.tk-c { color: var(--code-mute); }
+.tk-s { color: var(--tk-s); }
+.tk-k { color: var(--tk-k); }
+.tk-t { color: var(--tk-t); }
+.tk-n { color: var(--tk-n); }
+
+/* ---------- Şemalar ---------- */
+.pipeline { display: grid; gap: 12px; align-items: center; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 720px) { .pipeline { grid-template-columns: minmax(0, 1fr) auto minmax(0, .8fr); gap: 16px; } }
+.pipe-col { display: grid; gap: 10px; }
+.pipe-box { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; }
+.pipe-box b { font-family: var(--font-mono); font-size: .9rem; color: var(--ink); }
+.pipe-box span { font-size: .875rem; color: var(--muted); }
+.pipe-box.out { border-color: var(--accent); }
+.pipe-arrow { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); text-align: center; display: grid; gap: 2px; justify-items: center; }
+.pipe-arrow::after { content: "↓"; font-size: 1.3rem; line-height: 1; }
+@media (min-width: 720px) { .pipe-arrow::after { content: "→"; } .pipe-arrow { max-width: 150px; } }
+
+.figure-svg { margin: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 12px; max-width: 520px; }
+.figure-svg svg { display: block; width: 100%; height: auto; }
+.figure-svg figcaption { font-size: .8125rem; color: var(--muted); margin-top: 6px; }
+.fx-fill { fill: var(--accent); opacity: .12; }
+.fx-line { stroke: var(--accent); fill: none; stroke-width: 1.5; }
+.fx-plane { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.fx-axis { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.fx-text { fill: var(--muted); font: 500 11px var(--font-mono); }
+.fx-ok { fill: var(--ax-y); }
+.fx-bad { fill: var(--ax-x); }
+.fx-cam { fill: var(--ink); }
+
+/* ---------- Demolar ---------- */
+.demo { margin: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; overflow: hidden; min-width: 0; }
+.stage {
+  position: relative; aspect-ratio: var(--ar, 16 / 9); max-width: 100%;
+  background-color: var(--stage);
+  background-image:
+    linear-gradient(var(--stage-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--stage-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.nogl {
+  display: none; position: absolute; inset: 0; place-items: center; text-align: center; padding: 20px;
+  color: var(--stage-ink); font-size: .9rem;
+}
+.no-gl .stage canvas { display: none; }
+.no-gl .nogl { display: grid; }
+.readout {
+  position: absolute; left: 12px; right: 12px; bottom: 9px; display: flex; flex-wrap: wrap; gap: 0 16px;
+  font: 400 .75rem/1.6 var(--font-mono); color: var(--stage-ink); pointer-events: none; font-variant-numeric: tabular-nums;
+}
+.readout .ax-x, .inspect .ax-x { color: var(--sx); }
+.readout .ax-y, .inspect .ax-y { color: var(--sy); }
+.readout .ax-z, .inspect .ax-z { color: var(--sz); }
+.readout i, .inspect i { font-style: normal; font-weight: 500; }
+.hint {
+  position: absolute; top: 9px; left: 12px; font: 400 .7rem var(--font-mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--stage-ink); opacity: .7; pointer-events: none;
+}
+.slabel {
+  position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: none;
+  font: 500 .72rem/1 var(--font-mono); color: var(--stage-ink); background: rgba(7, 11, 20, .6); padding: 3px 6px; border-radius: 3px;
+}
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; padding: 12px 14px;
+  border-top: 1px solid var(--line); font-size: .875rem;
+}
+.ctl { display: flex; align-items: center; gap: 8px; }
+.ctl input[type="range"] { width: 140px; max-width: 100%; accent-color: var(--accent); }
+.ctl input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+.ctl output { font-family: var(--font-mono); font-size: .8125rem; min-width: 4.2ch; text-align: right; font-variant-numeric: tabular-nums; }
+.ctl select {
+  font: 500 .875rem var(--font-mono); padding: 5px 8px; border-radius: 4px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+}
+.demo-meta { padding: 10px 14px 12px; border-top: 1px solid var(--line); font-size: .875rem; color: var(--muted); }
+.demo-meta strong { color: var(--ink); font-weight: 600; }
+
+.mat-labels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); text-align: center; font: 500 .75rem var(--font-mono); padding: 8px 4px 0; color: var(--muted); }
+.mat-labels span { overflow-wrap: anywhere; }
+
+.chips-wrap { padding: 4px 14px 12px; border-top: 1px solid var(--line); }
+.group-label { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 10px 0 6px; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: 500 .8125rem var(--font-mono); padding: 6px 10px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.prim-info { padding: 12px 14px 14px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.prim-info p { margin: 0; }
+
+.sg-panels { display: grid; gap: 0; border-top: 1px solid var(--line); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .sg-panels { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .sg-panels > :first-child { border-right: 1px solid var(--line); } }
+.sg-panels > div { padding: 12px 14px 14px; min-width: 0; }
+.sg-panels h4 { margin: 0 0 8px; font: 500 .72rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.toggle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; font: 400 .8125rem var(--font-mono); }
+.inspect { width: 100%; min-width: 0; margin-top: 10px; font-size: .8125rem; }
+.inspect th, .inspect td { padding: 5px 0; border-bottom: 1px solid var(--line); background: none; text-transform: none; letter-spacing: 0; font-size: .8125rem; }
+.inspect th { font-family: var(--font-body); font-weight: 400; color: var(--muted); width: 38%; }
+.inspect td { font-family: var(--font-mono); font-weight: 400; white-space: normal; font-variant-numeric: tabular-nums; }
+.inspect td span { display: inline-block; min-width: 5.2ch; margin-right: 6px; }
+.tree {
+  margin: 0; padding: 10px; background: var(--code-bg); color: var(--code-ink); border-radius: 4px;
+  font: 400 .75rem/1.55 var(--font-mono); overflow-x: auto; border: 1px solid var(--code-line);
+}
+.tree .tl { display: block; white-space: pre; }
+.tree .tl.on { background: rgba(138, 162, 255, .22); color: #fff; }
+
+/* ---------- Alt bilgi ---------- */
+.site-footer { border-top: 1px solid var(--line); padding-block: 44px 64px; }
+.res { display: grid; gap: 10px; padding: 0; margin: 18px 0 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.res a {
+  display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+  text-decoration: none; color: var(--ink); font-weight: 600;
+}
+.res a span { display: block; font-weight: 400; font-size: .875rem; color: var(--muted); }
+.res a:hover { border-color: var(--accent); }
+.fine { max-width: 68ch; font-size: .875rem; color: var(--muted); margin: 0; }
+</style>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+        <line class="x" x1="5" y1="22" x2="24" y2="22"/>
+        <line class="y" x1="5" y1="22" x2="5" y2="3"/>
+        <line class="z" x1="5" y1="22" x2="16" y2="12"/>
+      </svg>
+      <span>Three.js Notları</span>
+    </a>
+    <nav class="toc" aria-label="Bölümler">
+      <a href="#giris">WebGL</a>
+      <a href="#kurulum">Kurulum</a>
+      <a href="#ilk-sahne">İlk sahne</a>
+      <a href="#temeller">Temeller</a>
+      <a href="#primitifler">Primitifler</a>
+      <a href="#scenegraph">Scenegraph</a>
+      <a href="#kaynaklar">Kaynaklar</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">WebGL · Three.js r170</p>
+        <h1>Three.js ile tarayıcıda 3B</h1>
+        <p class="lead">Bir sahne, bir kamera ve bir renderer. Three.js'in ilk üç parçası bu kadar. Aşağıdaki bölümler kılavuzun giriş konularını sırayla anlatır ve her birinde elinizle döndürebileceğiniz canlı bir demo vardır.</p>
+        <div class="cta-row">
+          <a class="btn" href="#kurulum">Kuruluma geç</a>
+          <a class="btn ghost" href="#ilk-sahne">İlk sahneyi gör</a>
+        </div>
+      </div>
+      <div class="demo">
+        <div class="stage" style="--ar: 4 / 3">
+          <canvas id="hero-canvas" aria-label="Dönen 3B şekil"></canvas>
+          <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+          <span class="hint">Sürükleyerek döndür</span>
+          <div class="readout" id="hero-ro">
+            <span>kamera</span>
+            <span><i class="ax-x">x</i> <span data-ro="x">0.0</span></span>
+            <span><i class="ax-y">y</i> <span data-ro="y">0.0</span></span>
+            <span><i class="ax-z">z</i> <span data-ro="z">0.0</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ===================== 01 ===================== -->
+    <section class="chapter" id="giris">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 01</span>
+        <h2>WebGL ve Three.js</h2>
+        <p class="chapter-kicker">Getting Started</p>
+      </div>
+      <div class="chapter-body">
+        <p class="prose">WebGL, tarayıcıda ekran kartına (GPU) erişen düşük seviyeli bir çizim arayüzüdür. <code>&lt;canvas&gt;</code> elementine çizer ve yalnızca nokta, çizgi ve üçgen bilir. Ekrana tek bir küp koymak için köşe verilerini GPU belleğine yüklemek, shader denen küçük programları yazmak ve dönüşüm matrislerini elle hesaplamak gerekir.</p>
+        <p class="prose">Three.js bu işi sahne, kamera, geometri, malzeme ve ışık gibi tanıdık kavramlara çevirir. Siz nesneleri tanımlarsınız, kütüphane gerekli WebGL çağrılarını üretir.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>İş</th><th>Ham WebGL</th><th>Three.js</th></tr></thead>
+            <tbody>
+              <tr><td>Şekil</td><td>Köşe verisini GPU buffer'ına elle yüklemek</td><td><code>BoxGeometry</code>, <code>SphereGeometry</code> gibi hazır geometriler</td></tr>
+              <tr><td>Görünüm</td><td>GLSL ile shader yazmak</td><td><code>MeshStandardMaterial</code> gibi hazır malzemeler</td></tr>
+              <tr><td>Bakış açısı</td><td>Projeksiyon matrisini hesaplamak</td><td><code>PerspectiveCamera</code></td></tr>
+              <tr><td>Işık</td><td>Aydınlatma formüllerini shader'a eklemek</td><td><code>DirectionalLight</code>, <code>PointLight</code></td></tr>
+              <tr><td>Nesne ilişkisi</td><td>Hiyerarşiyi kendiniz yönetmek</td><td><code>Object3D</code> ağacı (scenegraph)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="callout"><span class="tag">Gereksinim</span>Güncel Three.js sürümleri WebGL2 ister ve modern tarayıcıların hepsi bunu destekler. Bu sayfadaki canlı demolar da WebGL2 kullanır.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 02 ===================== -->
+    <section class="chapter" id="kurulum">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 02</span>
+        <h2>Kurulum</h2>
+        <p class="chapter-kicker">Installation</p>
+      </div>
+      <div class="chapter-body">
+        <p class="prose">Three.js'i projeye almanın iki yaygın yolu var. Derleme aracı istemeyen küçük denemeler için CDN ve <code>importmap</code>, gerçek projeler için npm ve bir bundler.</p>
+        <div data-tabs>
+          <div class="tabs" role="tablist" aria-label="Kurulum yöntemi">
+            <button class="tab" role="tab" id="tab-cdn" aria-controls="panel-cdn" aria-selected="true" type="button">CDN ve importmap</button>
+            <button class="tab" role="tab" id="tab-npm" aria-controls="panel-npm" aria-selected="false" type="button">npm ve Vite</button>
+          </div>
+          <div class="tabpanel" role="tabpanel" id="panel-cdn" aria-labelledby="tab-cdn" style="margin-top:16px">
+            <p class="prose"><code>importmap</code>, <code>three</code> adını bir adrese bağlar. Böylece modül içinde <code>import * as THREE from 'three'</code> yazabilirsiniz. Sürüm numarasını adreste sabitleyin ki kütüphane güncellenince sayfanız bozulmasın.</p>
+            <figure class="code">
+              <figcaption><span>HTML</span><button class="copy" type="button">Kopyala</button></figcaption>
+              <pre data-lang="html"><code>&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+&lt;/script&gt;</code></pre>
+            </figure>
+            <figure class="code">
+              <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+              <pre data-lang="js"><code>import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+console.log(THREE.REVISION);   // "170"</code></pre>
+            </figure>
+          </div>
+          <div class="tabpanel" role="tabpanel" id="panel-npm" aria-labelledby="tab-npm" style="margin-top:16px" hidden>
+            <p class="prose">Vite gibi bir bundler kullanıyorsanız paketi kurup doğrudan içe aktarırsınız. Bundler, kullanmadığınız kodu paketin dışında bırakabilir.</p>
+            <figure class="code">
+              <figcaption><span>Terminal</span><button class="copy" type="button">Kopyala</button></figcaption>
+              <pre data-lang="sh"><code>npm install --save three
+npm install --save-dev vite
+npx vite</code></pre>
+            </figure>
+            <figure class="code">
+              <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+              <pre data-lang="js"><code>import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';</code></pre>
+            </figure>
+          </div>
+        </div>
+        <p class="callout"><span class="tag">İki not</span><code>OrbitControls</code> gibi yardımcılar çekirdek pakette değil <code>addons</code> klasöründedir, bu yüzden importmap'te ayrı bir eşleme gerekir. Dosyayı çift tıklayıp <code>file://</code> ile açarsanız bazı tarayıcılar modülleri engeller. Klasörde <code>python3 -m http.server</code> çalıştırıp <code>localhost:8000</code> adresini kullanın.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 03 ===================== -->
+    <section class="chapter" id="ilk-sahne">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 03</span>
+        <h2>İlk sahne</h2>
+        <p class="chapter-kicker">Creating a Scene</p>
+      </div>
+      <div class="chapter-body">
+        <p class="prose">Ekrana bir şey çizmek için üç parça gerekir. <code>Scene</code> çizilecek nesneleri tutar, <code>Camera</code> sahneye nereden ve nasıl bakılacağını söyler, <code>WebGLRenderer</code> ikisini alıp <code>&lt;canvas&gt;</code> üzerine çizer.</p>
+        <div class="pipeline" role="img" aria-label="Scene ve Camera, renderer.render çağrısıyla canvas'a çizilir">
+          <div class="pipe-col">
+            <div class="pipe-box"><b>Scene</b><span>Mesh (Geometry + Material), Light</span></div>
+            <div class="pipe-box"><b>Camera</b><span>PerspectiveCamera</span></div>
+          </div>
+          <div class="pipe-arrow">renderer.render(scene, camera)</div>
+          <div class="pipe-box out"><b>&lt;canvas&gt;</b><span>WebGLRenderer'ın çizdiği yer</span></div>
+        </div>
+        <figure class="code">
+          <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+          <pre data-lang="js"><code>import * as THREE from 'three';
+
+const canvas = document.querySelector('#c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+
+// 1. Kamera: fov, aspect, near, far
+const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 5);
+camera.position.z = 2;
+
+// 2. Sahne
+const scene = new THREE.Scene();
+
+// 3. Mesh = Geometry (şekil) + Material (görünüm)
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+// 4. Animasyon döngüsü
+function render(time) {
+  time *= 0.001;               // milisaniye → saniye
+  cube.rotation.x = time;
+  cube.rotation.y = time;
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(render);</code></pre>
+        </figure>
+        <p class="prose">Kod elle yazılmış <code>aspect = 2</code> değerini kullanıyor, çünkü varsayılan tuval 300×150 pikseldir. Gerçek sayfada bu oranı tuval boyutuna bağlarız. Bunu Temeller bölümünde göreceğiz.</p>
+        <dl class="params">
+          <dt>fov</dt><dd>Dikey görüş açısı, derece cinsinden. Büyütürseniz sahne geniş açı lensle çekilmiş gibi görünür.</dd>
+          <dt>aspect</dt><dd>Tuvalin genişlik bölü yükseklik oranı. Tuvale bağlanmazsa görüntü gerilir.</dd>
+          <dt>near, far</dt><dd>Kameradan bu iki uzaklık arasında kalan nesneler çizilir, dışarıda kalanlar çizilmez.</dd>
+        </dl>
+        <figure class="demo">
+          <div class="stage">
+            <canvas id="cube-canvas" aria-label="Dönen yeşil küp"></canvas>
+            <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+            <span class="hint">Sürükleyerek döndür</span>
+            <div class="readout" id="cube-ro">
+              <span>küp</span>
+              <span><i class="ax-x">rotation.x</i> <span data-ro="rx">0.00</span></span>
+              <span><i class="ax-y">rotation.y</i> <span data-ro="ry">0.00</span></span>
+              <span>kamera <i class="ax-z">z</i> <span data-ro="z">0.0</span></span>
+            </div>
+          </div>
+          <div class="controls">
+            <label class="ctl"><input type="checkbox" id="cube-spin"> Küpü döndür</label>
+            <label class="ctl"><input type="checkbox" id="cube-edges" checked> Kenarları göster</label>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== 04 ===================== -->
+    <section class="chapter" id="temeller">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 04</span>
+        <h2>Temeller</h2>
+        <p class="chapter-kicker">Fundamentals</p>
+      </div>
+      <div class="chapter-body">
+        <h3>Çizim döngüsü</h3>
+        <p class="prose"><code>renderer.setAnimationLoop(fn)</code> her ekran yenilemesinde <code>fn</code> işlevini çağırır ve işleve geçen zamanı milisaniye olarak verir. Animasyonu bu zamana bağlarsanız hız, bilgisayarın kare hızından bağımsız olur. Sekme arka plana geçince döngü kendiliğinden durur.</p>
+
+        <h3>Duyarlı tuval</h3>
+        <p class="prose">Tuvalin CSS boyutu ile çizim çözünürlüğü iki ayrı şeydir. Çözünürlük CSS boyutuna uymazsa görüntü bulanık görünür, kameranın <code>aspect</code> değeri güncellenmezse gerilir. Aşağıdaki işlev ikisini de her karede denetler.</p>
+        <figure class="code">
+          <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+          <pre data-lang="js"><code>function resizeRendererToDisplaySize(renderer) {
+  const canvas = renderer.domElement;
+  const pixelRatio = Math.min(window.devicePixelRatio, 2);
+  const width = Math.floor(canvas.clientWidth * pixelRatio);
+  const height = Math.floor(canvas.clientHeight * pixelRatio);
+  const needResize = canvas.width !== width || canvas.height !== height;
+  if (needResize) {
+    renderer.setSize(width, height, false);   // false: CSS boyutuna dokunma
+  }
+  return needResize;
+}
+
+function render(time) {
+  if (resizeRendererToDisplaySize(renderer)) {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+  // ...
+  renderer.render(scene, camera);
+}</code></pre>
+        </figure>
+        <p class="prose">Yüksek yoğunluklu ekranlarda <code>devicePixelRatio</code> 3 veya daha büyük olabilir. Çözünürlüğü 2 ile sınırlamak, görüntüden pek bir şey kaybetmeden GPU yükünü azaltır.</p>
+
+        <h3>Kamera ve görüş hacmi</h3>
+        <p class="prose"><code>PerspectiveCamera</code> sahneyi kesik bir piramit, yani <em>frustum</em> içinde görür. Piramidin ağzı <code>fov</code> ile, ön ve arka yüzeyi <code>near</code> ve <code>far</code> ile belirlenir. Yalnızca bu hacmin içindeki nesneler çizilir.</p>
+        <figure class="figure-svg">
+          <svg viewBox="0 0 420 200" role="img" aria-label="Kameradan başlayan kesik piramit görüş hacmi: near düzlemi, far düzlemi ve fov açısı">
+            <line class="fx-axis" x1="30" y1="100" x2="410" y2="100"/>
+            <polygon class="fx-fill" points="110,79.4 340,20 340,180 110,120.6"/>
+            <polyline class="fx-line" points="30,100 340,20 340,180 30,100"/>
+            <line class="fx-plane" x1="110" y1="79.4" x2="110" y2="120.6"/>
+            <line class="fx-plane" x1="340" y1="20" x2="340" y2="180"/>
+            <path class="fx-line" d="M 68.7 90 A 40 40 0 0 1 68.7 110"/>
+            <circle class="fx-cam" cx="30" cy="100" r="5"/>
+            <text class="fx-text" x="14" y="124">kamera</text>
+            <text class="fx-text" x="76" y="104">fov</text>
+            <text class="fx-text" x="96" y="66">near</text>
+            <text class="fx-text" x="316" y="12">far</text>
+            <circle class="fx-bad" cx="62" cy="100" r="6"/>
+            <text class="fx-text" x="40" y="150">near'den önce</text>
+            <circle class="fx-ok" cx="210" cy="92" r="9"/>
+            <text class="fx-text" x="188" y="124">görünür</text>
+            <circle class="fx-bad" cx="372" cy="100" r="9"/>
+            <text class="fx-text" x="344" y="134">far'dan sonra</text>
+          </svg>
+          <figcaption>Yukarıdan bakış. Yeşil nesne çizilir, kırmızı olanlar kırpılır.</figcaption>
+        </figure>
+        <p class="prose">Aşağıdaki demoda kamera sabit. Kaydırıcılarla <code>fov</code>, <code>near</code> ve <code>far</code> değerlerini değiştirin ve on kürenin kaçının görüş hacminde kaldığını izleyin.</p>
+        <figure class="demo">
+          <div class="stage">
+            <canvas id="cam-canvas" aria-label="Kameranın görüş hacmi demosu"></canvas>
+            <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+            <div class="readout" id="cam-ro">
+              <span>görünen küre <span data-ro="count">10</span> / 10</span>
+            </div>
+          </div>
+          <div class="controls">
+            <label class="ctl">fov <input type="range" id="cam-fov" min="20" max="110" step="1" value="50"><output id="cam-fov-o">50°</output></label>
+            <label class="ctl">near <input type="range" id="cam-near" min="0.1" max="30" step="0.1" value="0.1"><output id="cam-near-o">0.1</output></label>
+            <label class="ctl">far <input type="range" id="cam-far" min="10" max="70" step="1" value="60"><output id="cam-far-o">60</output></label>
+          </div>
+        </figure>
+
+        <h3>Malzeme, doku ve ışık</h3>
+        <p class="prose">Bir <code>Mesh</code>, şekli veren <code>Geometry</code> ile görünümü belirleyen <code>Material</code> nesnesinin birleşimidir. Malzemenin <code>map</code> özelliğine bir <code>Texture</code> verirseniz yüzey o dokuyla kaplanır. Her malzeme ışığa farklı tepki verir.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Malzeme</th><th>Işık gerekir mi</th><th>Ne yapar</th></tr></thead>
+            <tbody>
+              <tr><td><code>MeshBasicMaterial</code></td><td>Hayır</td><td>Işıktan etkilenmez, düz renk gösterir. En ucuzudur.</td></tr>
+              <tr><td><code>MeshLambertMaterial</code></td><td>Evet</td><td>Yalnızca mat, yaygın yansıma hesaplar.</td></tr>
+              <tr><td><code>MeshPhongMaterial</code></td><td>Evet</td><td>Mat yansımaya parlak vurgu (specular) ekler.</td></tr>
+              <tr><td><code>MeshStandardMaterial</code></td><td>Evet</td><td>Fiziksel tabanlıdır. <code>roughness</code> ve <code>metalness</code> ile ayarlanır.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">Demoda aynı renkli dört küre var. Işıkları kapatın: yalnızca Basic görünür kalır, diğerleri siyaha döner.</p>
+        <figure class="demo">
+          <div class="stage" style="--ar: 21 / 9">
+            <canvas id="mat-canvas" aria-label="Dört farklı malzemeli küre"></canvas>
+            <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+          </div>
+          <div class="mat-labels"><span>Basic</span><span>Lambert</span><span>Phong</span><span>Standard</span></div>
+          <div class="controls">
+            <label class="ctl"><input type="checkbox" id="mat-key" checked> Yön ışığı</label>
+            <label class="ctl"><input type="checkbox" id="mat-amb" checked> Ortam ışığı</label>
+            <label class="ctl"><input type="checkbox" id="mat-orbit"> Işığı döndür</label>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== 05 ===================== -->
+    <section class="chapter" id="primitifler">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 05</span>
+        <h2>Primitifler</h2>
+        <p class="chapter-kicker">Primitives</p>
+      </div>
+      <div class="chapter-body">
+        <p class="prose">Primitifler, Three.js'in parametreyle ürettiği hazır geometrilerdir. Hepsi <code>BufferGeometry</code> türündedir ve köşe konumu (<code>position</code>), yüzey yönü (<code>normal</code>) ve doku koordinatı (<code>uv</code>) verisi üretir. Aşağıdan birini seçin, döndürün ve köşe ile üçgen sayısına bakın.</p>
+        <figure class="demo">
+          <div class="stage">
+            <canvas id="prim-canvas" aria-label="Seçilen primitif geometri"></canvas>
+            <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+            <span class="hint">Sürükleyerek döndür</span>
+            <div class="readout" id="prim-ro"><span data-ro="stats"></span></div>
+          </div>
+          <div class="controls">
+            <label class="ctl"><input type="checkbox" id="prim-spin"> Döndür</label>
+            <label class="ctl"><input type="checkbox" id="prim-wire"> Tel kafes</label>
+          </div>
+          <div class="chips-wrap" id="prim-chips"></div>
+          <div class="prim-info">
+            <p id="prim-desc"></p>
+            <figure class="code" style="margin:0">
+              <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+              <pre data-lang="js" id="prim-pre"><code id="prim-code"></code></pre>
+            </figure>
+          </div>
+        </figure>
+        <p class="prose">Segment sayıları görüntü kalitesi ile maliyet arasındaki ayardır. <code>SphereGeometry</code> için küçük değerler seçip tel kafesi açın, sayaçta köşe sayısının nasıl değiştiğini görürsünüz. <code>EdgesGeometry</code> ve <code>WireframeGeometry</code> üçgen değil çizgi üretir, bu yüzden <code>Mesh</code> yerine <code>LineSegments</code> ile çizilir.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 06 ===================== -->
+    <section class="chapter" id="scenegraph">
+      <div class="chapter-head">
+        <span class="chapter-no">Bölüm 06</span>
+        <h2>Scenegraph</h2>
+        <p class="chapter-kicker">Core Concepts</p>
+      </div>
+      <div class="chapter-body">
+        <p class="prose">Three.js sahnesi bir ağaçtır. <code>Scene</code> kök, <code>Object3D</code> ve ondan türeyen <code>Mesh</code>, <code>Light</code>, <code>Camera</code> ve <code>Group</code> düğümlerdir. Bir düğümün <code>position</code>, <code>rotation</code> ve <code>scale</code> değerleri ebeveynine göredir. Buna yerel uzay denir. Nesnenin ekrandaki gerçek yeri, bütün ebeveynlerin dönüşümlerinin birleşimidir ve buna dünya uzayı denir.</p>
+        <figure class="code">
+          <figcaption><span>JavaScript</span><button class="copy" type="button">Kopyala</button></figcaption>
+          <pre data-lang="js"><code>const solarSystem = new THREE.Object3D();
+scene.add(solarSystem);
+
+const earthOrbit = new THREE.Object3D();
+earthOrbit.position.x = 10;          // Güneş'e göre 10 birim
+solarSystem.add(earthOrbit);
+
+const moonOrbit = new THREE.Object3D();
+moonOrbit.position.x = 2;            // Dünya'ya göre 2 birim
+earthOrbit.add(moonOrbit);
+
+earthOrbit.rotation.y = time;        // Dünya döner, Ay da onunla birlikte taşınır</code></pre>
+        </figure>
+        <dl class="params">
+          <dt>add, remove</dt><dd>Bir nesneyi başka bir nesnenin çocuğu yapar ya da ağaçtan çıkarır.</dd>
+          <dt>traverse</dt><dd>Nesne ve bütün torunları üzerinde bir işlev çalıştırır.</dd>
+          <dt>getWorldPosition</dt><dd>Nesnenin dünya uzayındaki konumunu verir.</dd>
+          <dt>Group</dt><dd>Kendisi çizilmeyen, yalnızca nesneleri bir arada taşımaya yarayan düğümdür.</dd>
+        </dl>
+        <p class="prose">Demoda Güneş, Dünya ve Ay aynı ağacın parçaları. Aşağıdan düğümlerin yerel eksenlerini ve ızgaralarını açın. Düğüm seçip yerel ve dünya konumunun nasıl ayrıldığına bakın. Ay'ın yerel konumu hiç değişmez, dünya konumu ise Dünya'yla birlikte döner.</p>
+        <figure class="demo">
+          <div class="stage" id="sg-stage">
+            <canvas id="sg-canvas" aria-label="Güneş, Dünya ve Ay hiyerarşisi"></canvas>
+            <div class="nogl">Canlı demo bu tarayıcıda çalışmıyor. WebGL2 gerekir.</div>
+            <span class="hint">Sürükleyerek döndür</span>
+          </div>
+          <div class="controls">
+            <label class="ctl"><input type="checkbox" id="sg-spin"> Döndür</label>
+            <label class="ctl">hız <input type="range" id="sg-speed" min="0" max="3" step="0.1" value="1"><output id="sg-speed-o">1.0×</output></label>
+          </div>
+          <div class="sg-panels">
+            <div>
+              <h4>Eksen ve ızgara</h4>
+              <div class="toggle-grid" id="sg-toggles"></div>
+              <h4 style="margin-top:16px">Düğüm denetçisi</h4>
+              <label class="ctl"><select id="sg-pick" aria-label="İncelenecek düğüm"></select></label>
+              <table class="inspect" id="sg-inspect">
+                <tr data-row="local"><th>Yerel konum</th><td><i class="ax-x">x</i><span data-v="x"></span><i class="ax-y">y</i><span data-v="y"></span><i class="ax-z">z</i><span data-v="z"></span></td></tr>
+                <tr data-row="world"><th>Dünya konumu</th><td><i class="ax-x">x</i><span data-v="x"></span><i class="ax-y">y</i><span data-v="y"></span><i class="ax-z">z</i><span data-v="z"></span></td></tr>
+                <tr data-row="scale"><th>Dünya ölçeği</th><td><span data-v="x"></span></td></tr>
+              </table>
+            </div>
+            <div>
+              <h4>Sahne grafiği</h4>
+              <pre class="tree" id="sg-tree"></pre>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+</div>
+</main>
+
+<footer class="site-footer" id="kaynaklar">
+  <div class="wrap">
+    <h2>Kaynaklar</h2>
+    <ul class="res">
+      <li><a href="https://threejs.org/manual/" target="_blank" rel="noopener">Resmî kılavuz<span>Bu sayfanın dayandığı konuların ayrıntılı anlatımı</span></a></li>
+      <li><a href="https://threejs.org/docs/" target="_blank" rel="noopener">API belgesi<span>Bütün sınıflar ve parametreleri</span></a></li>
+    </ul>
+    <p class="fine" style="margin-top:28px">Bu sayfa, threejs.org/manual içindeki giriş konularını Türkçe özetleyen bir çalışma notudur ve Three.js r170 ile hazırlanmıştır. Güncel sürümde küçük farklar olabilir. Ayrıntı için resmî kılavuza bakın.</p>
+  </div>
+</footer>
+
+<!-- ================= Arayüz betiği (Three.js'ten bağımsız) ================= -->
+<script>
+(function () {
+  /* ---- Basit söz dizimi renklendirme ---- */
+  var KW = /^(import|from|const|let|var|function|return|new|class|extends|for|of|if|else|true|false|null|undefined|export|default)$/;
+  var JS_RE = /(\/\/[^\n]*)|('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`)|(\b0x[0-9a-fA-F]+\b|\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_$][\w$]*\b)/g;
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function span(c, t) { return '<span class="' + c + '">' + esc(t) + '</span>'; }
+  function hlJS(src) {
+    var out = '', last = 0, m;
+    JS_RE.lastIndex = 0;
+    while ((m = JS_RE.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      var t = m[0];
+      if (m[1]) out += span('tk-c', t);
+      else if (m[2]) out += span('tk-s', t);
+      else if (m[3]) out += span('tk-n', t);
+      else if (KW.test(t)) out += span('tk-k', t);
+      else if (/^[A-Z][A-Za-z0-9]+$/.test(t)) out += span('tk-t', t);
+      else out += esc(t);
+      last = m.index + t.length;
+    }
+    return out + esc(src.slice(last));
+  }
+  function hlHTML(src) {
+    var re = /(<\/?[A-Za-z][\w-]*)|("[^"\n]*")/g, out = '', last = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      out += span(m[1] ? 'tk-k' : 'tk-s', m[0]);
+      last = m.index + m[0].length;
+    }
+    return out + esc(src.slice(last));
+  }
+  function hlSH(src) {
+    return esc(src).replace(/(^|\n)(#[^\n]*)/g, '$1<span class="tk-c">$2</span>');
+  }
+  window.hl = function (src, lang) {
+    return lang === 'html' ? hlHTML(src) : lang === 'sh' ? hlSH(src) : hlJS(src);
+  };
+  document.querySelectorAll('.code pre').forEach(function (pre) {
+    var code = pre.querySelector('code');
+    if (code && code.textContent.trim()) code.innerHTML = window.hl(code.textContent, pre.getAttribute('data-lang') || 'js');
+  });
+
+  /* ---- Kopyala düğmeleri ---- */
+  document.querySelectorAll('.code').forEach(function (fig) {
+    var btn = fig.querySelector('.copy');
+    var code = fig.querySelector('code');
+    if (!btn || !code) return;
+    btn.addEventListener('click', function () {
+      var text = code.textContent;
+      var done = function (msg) {
+        btn.textContent = msg;
+        setTimeout(function () { btn.textContent = 'Kopyala'; }, 1800);
+      };
+      var fallback = function () {
+        try {
+          var r = document.createRange();
+          r.selectNodeContents(code);
+          var s = window.getSelection();
+          s.removeAllRanges();
+          s.addRange(r);
+        } catch (e) { /* seçim yapılamadıysa sessizce geç */ }
+        done('Seçildi, Ctrl+C');
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done('Kopyalandı'); }, fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+
+  /* ---- Sekmeler ---- */
+  document.querySelectorAll('[data-tabs]').forEach(function (root) {
+    var tabs = root.querySelectorAll('[role="tab"]');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+      });
+    });
+  });
+
+  /* ---- Üst çubukta etkin bölüm ---- */
+  var links = {};
+  document.querySelectorAll('.toc a').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      Object.keys(links).forEach(function (k) { links[k].removeAttribute('aria-current'); });
+      var a = links[e.target.id];
+      if (a) {
+        a.setAttribute('aria-current', 'true');
+        var bar = a.parentElement;
+        if (bar.scrollWidth > bar.clientWidth) bar.scrollLeft = a.offsetLeft - 24;
+      }
+    });
+  }, { rootMargin: '-35% 0px -60% 0px' });
+  Object.keys(links).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+
+  /* ---- Demo yüklenemezse bilgi ver ---- */
+  setTimeout(function () {
+    if (!window.__threeReady) document.documentElement.classList.add('no-gl');
+  }, 10000);
+})();
+</script>
+
+<!-- ================= Three.js demoları ================= -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const hasGL = (() => {
+  try { return !!document.createElement('canvas').getContext('webgl2'); } catch (e) { return false; }
+})();
+
+if (hasGL) {
+  start();
+} else {
+  document.documentElement.classList.add('no-gl');
+}
+
+function start() {
+  window.__threeReady = true;
+  document.documentElement.classList.remove('no-gl');
+
+  const $ = (id) => document.getElementById(id);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fx = (n, d = 2) => (Math.abs(n) < 0.5 * Math.pow(10, -d) ? 0 : n).toFixed(d);
+
+  /* ------------------------------------------------------------------
+     Ortak altyapı: her demo kendi renderer'ına sahip, ortak bir döngü
+     yalnızca ekranda görünen demoları çizer.
+     ------------------------------------------------------------------ */
+  const viewers = [];
+
+  function createViewer(id, opts = {}) {
+    const canvas = $(id);
+    const stage = canvas.parentElement;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(opts.fov ?? 50, 1, opts.near ?? 0.1, opts.far ?? 100);
+    camera.position.set(...(opts.pos ?? [0, 0, 5]));
+
+    let controls = null;
+    if (opts.orbit !== false) {
+      controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.enableZoom = false;   // tekerlek sayfayı kaydırsın
+      controls.enablePan = false;
+      if (opts.target) controls.target.set(...opts.target);
+      canvas.style.touchAction = 'pan-y';   // telefonda dikey kaydırma çalışsın
+    }
+
+    const v = { canvas, renderer, scene, camera, controls, visible: false, last: null, dt: 0, tick: null, after: null, onResize: opts.onResize };
+    new ResizeObserver(() => resize(v)).observe(canvas);
+    new IntersectionObserver((entries) => { v.visible = entries[0].isIntersecting; }, { rootMargin: '120px' }).observe(stage);
+    viewers.push(v);
+    resize(v);
+    return v;
+  }
+
+  function resize(v) {
+    const { canvas, renderer, camera } = v;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+    const h = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+    if (canvas.width !== w || canvas.height !== h) renderer.setSize(w, h, false);
+    camera.aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    camera.updateProjectionMatrix();
+    if (v.onResize) v.onResize(camera.aspect, v);
+  }
+
+  function frame(ms) {
+    const t = ms * 0.001;
+    for (const v of viewers) {
+      if (!v.visible) { v.last = null; continue; }
+      v.dt = v.last === null ? 0 : Math.min(t - v.last, 0.1);
+      v.last = t;
+      if (v.tick) v.tick(t);
+      if (v.controls) v.controls.update();
+      v.renderer.render(v.scene, v.camera);
+      if (v.after) v.after();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  function addLights(scene, { key = 3, amb = 0.6, pos = [-2, 3, 4] } = {}) {
+    const keyLight = new THREE.DirectionalLight(0xffffff, key);
+    keyLight.position.set(...pos);
+    const ambient = new THREE.AmbientLight(0xffffff, amb);
+    scene.add(keyLight, ambient);
+    return { keyLight, ambient };
+  }
+
+  function camReadout(v, root) {
+    const xs = root.querySelector('[data-ro="x"]');
+    const ys = root.querySelector('[data-ro="y"]');
+    const zs = root.querySelector('[data-ro="z"]');
+    let last = '';
+    return () => {
+      const p = v.camera.position;
+      const s = fx(p.x, 1) + fx(p.y, 1) + fx(p.z, 1);
+      if (s === last) return;
+      last = s;
+      xs.textContent = fx(p.x, 1);
+      ys.textContent = fx(p.y, 1);
+      zs.textContent = fx(p.z, 1);
+    };
+  }
+
+  const WIRE = 0xaebbe0;
+
+  /* ------------------------------------------------------------------
+     Kahraman alanı: sahnenin en küçük hâli
+     ------------------------------------------------------------------ */
+  (function hero() {
+    const v = createViewer('hero-canvas', { fov: 45, pos: [3.2, 2.2, 4.4] });
+    const group = new THREE.Group();
+    const solid = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1, 1),
+      new THREE.MeshStandardMaterial({ color: 0x4a6bff, flatShading: true, roughness: 0.45, metalness: 0.1 })
+    );
+    const wire = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1.45, 1),
+      new THREE.MeshBasicMaterial({ color: WIRE, wireframe: true, transparent: true, opacity: 0.5 })
+    );
+    group.add(solid, wire);
+    v.scene.add(group, new THREE.AxesHelper(2.2));
+    addLights(v.scene, { key: 3, amb: 0.7, pos: [-2, 3, 4] });
+
+    v.tick = () => {
+      if (reduceMotion) return;
+      group.rotation.y += v.dt * 0.4;
+      group.rotation.x += v.dt * 0.15;
+    };
+    v.after = camReadout(v, $('hero-ro'));
+  })();
+
+  /* ------------------------------------------------------------------
+     Demo A: İlk sahne
+     ------------------------------------------------------------------ */
+  (function creatingScene() {
+    const v = createViewer('cube-canvas', { fov: 60, pos: [0, 0, 2.8] });
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x44aa88 }));
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), new THREE.LineBasicMaterial({ color: 0xffffff }));
+    cube.add(edges);
+    v.scene.add(cube);
+
+    const spin = $('cube-spin');
+    spin.checked = !reduceMotion;
+    $('cube-edges').addEventListener('change', (e) => { edges.visible = e.target.checked; });
+
+    const ro = $('cube-ro');
+    const rx = ro.querySelector('[data-ro="rx"]');
+    const ry = ro.querySelector('[data-ro="ry"]');
+    const cz = ro.querySelector('[data-ro="z"]');
+    const TAU = Math.PI * 2;
+
+    v.tick = () => {
+      if (spin.checked) {
+        cube.rotation.x += v.dt;
+        cube.rotation.y += v.dt;
+      }
+    };
+    v.after = () => {
+      rx.textContent = fx(((cube.rotation.x % TAU) + TAU) % TAU);
+      ry.textContent = fx(((cube.rotation.y % TAU) + TAU) % TAU);
+      cz.textContent = fx(v.camera.position.z, 1);
+    };
+  })();
+
+  /* ------------------------------------------------------------------
+     Demo B: Kamera ve görüş hacmi
+     ------------------------------------------------------------------ */
+  (function cameraFrustum() {
+    const v = createViewer('cam-canvas', { fov: 50, near: 0.1, far: 60, pos: [0, 2.5, 9], orbit: false });
+    v.camera.lookAt(0, 0, -12);
+
+    addLights(v.scene, { key: 2.5, amb: 0.8, pos: [-3, 5, 6] });
+    const grid = new THREE.GridHelper(80, 40, 0x4a5a85, 0x2a3556);
+    grid.position.y = -1;
+    v.scene.add(grid);
+
+    const spheres = [];
+    const sphereGeo = new THREE.SphereGeometry(0.9, 32, 24);
+    for (let i = 0; i < 10; i++) {
+      const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(0.62 - i * 0.055, 0.7, 0.58), roughness: 0.5 });
+      const s = new THREE.Mesh(sphereGeo, mat);
+      s.position.set(i % 2 ? 1.8 : -1.8, 0, 5 - i * 4);
+      v.scene.add(s);
+      spheres.push(s);
+    }
+
+    const frustum = new THREE.Frustum();
+    const pv = new THREE.Matrix4();
+    const countEl = $('cam-ro').querySelector('[data-ro="count"]');
+    let lastCount = -1;
+
+    v.after = () => {
+      v.scene.updateMatrixWorld(true);
+      pv.multiplyMatrices(v.camera.projectionMatrix, v.camera.matrixWorldInverse);
+      frustum.setFromProjectionMatrix(pv);
+      const n = spheres.filter((s) => frustum.intersectsObject(s)).length;
+      if (n !== lastCount) { lastCount = n; countEl.textContent = n; }
+    };
+
+    function bind(id, outId, fmt, apply) {
+      const input = $(id);
+      const out = $(outId);
+      const update = () => { out.textContent = fmt(+input.value); apply(+input.value); v.camera.updateProjectionMatrix(); };
+      input.addEventListener('input', update);
+    }
+    bind('cam-fov', 'cam-fov-o', (n) => n + '°', (n) => { v.camera.fov = n; });
+    bind('cam-near', 'cam-near-o', (n) => n.toFixed(1), (n) => { v.camera.near = n; });
+    bind('cam-far', 'cam-far-o', (n) => String(n), (n) => { v.camera.far = n; });
+  })();
+
+  /* ------------------------------------------------------------------
+     Demo C: Malzeme ve ışık
+     ------------------------------------------------------------------ */
+  (function materials() {
+    const v = createViewer('mat-canvas', {
+      fov: 40, pos: [0, 0.4, 10], orbit: false,
+      onResize(aspect, viewer) {
+        const t = Math.tan(THREE.MathUtils.degToRad(viewer.camera.fov / 2));
+        viewer.camera.position.z = 4.2 / (t * aspect);
+      },
+    });
+    v.camera.lookAt(0, 0, 0);
+
+    const geometry = new THREE.SphereGeometry(0.85, 48, 32);
+    const color = 0x44aa88;
+    const mats = [
+      new THREE.MeshBasicMaterial({ color }),
+      new THREE.MeshLambertMaterial({ color }),
+      new THREE.MeshPhongMaterial({ color, shininess: 100 }),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.1 }),
+    ];
+    mats.forEach((m, i) => {
+      const s = new THREE.Mesh(geometry, m);
+      s.position.x = -3 + i * 2;
+      v.scene.add(s);
+    });
+
+    const { keyLight, ambient } = addLights(v.scene, { key: 3, amb: 0.5, pos: [3, 3, 5] });
+    const marker = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffe9a8 }));
+    v.scene.add(marker);
+
+    const keyCb = $('mat-key');
+    const ambCb = $('mat-amb');
+    const orbitCb = $('mat-orbit');
+    orbitCb.checked = !reduceMotion;
+    let angle = 0.6;
+
+    v.tick = () => {
+      if (orbitCb.checked) angle += v.dt * 1.1;
+      keyLight.position.set(Math.sin(angle) * 5, 2.6, Math.cos(angle) * 5);
+      marker.position.copy(keyLight.position);
+      keyLight.visible = keyCb.checked;
+      marker.visible = keyCb.checked;
+      ambient.visible = ambCb.checked;
+    };
+  })();
+
+  /* ------------------------------------------------------------------
+     Demo D: Primitifler
+     ------------------------------------------------------------------ */
+  function heartShape() {
+    const shape = new THREE.Shape();
+    const x = -2.5, y = -5;
+    shape.moveTo(x + 2.5, y + 2.5);
+    shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+    shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+    shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+    shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+    shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+    shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+    return shape;
+  }
+
+  class CustomSinCurve extends THREE.Curve {
+    constructor(scale = 1) { super(); this.scale = scale; }
+    getPoint(t, target = new THREE.Vector3()) {
+      return target.set(t * 3 - 1.5, Math.sin(2 * Math.PI * t), 0).multiplyScalar(this.scale);
+    }
+  }
+
+  const cubeVerts = [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1];
+  const cubeFaces = [2, 1, 0, 0, 3, 2, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0, 1, 2, 6, 6, 5, 1, 2, 3, 7, 7, 6, 2, 4, 5, 6, 6, 7, 4];
+
+  const HEART_CODE = 'const shape = new THREE.Shape();\nshape.moveTo(x + 2.5, y + 2.5);\nshape.bezierCurveTo(/* ... */);   // bezier eğrileriyle kalp çizilir\n';
+
+  const GROUPS = ['Temel şekiller', 'Çokyüzlüler', 'Şekilden üretilenler', 'Çizgi tabanlı'];
+  const ENTRIES = [
+    { g: 0, name: 'Box', make: () => new THREE.BoxGeometry(8, 8, 8),
+      desc: 'Kutu. Genişlik, yükseklik ve derinlik ile her yüzdeki bölüm sayısı verilir.',
+      code: '// BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)\nconst geometry = new THREE.BoxGeometry(8, 8, 8);' },
+    { g: 0, name: 'Circle', make: () => new THREE.CircleGeometry(7, 24),
+      desc: 'Düz bir daire. segments arttıkça çokgen yuvarlaklaşır, 3 verirseniz üçgen olur.',
+      code: '// CircleGeometry(radius, segments, thetaStart, thetaLength)\nconst geometry = new THREE.CircleGeometry(7, 24);' },
+    { g: 0, name: 'Cone', make: () => new THREE.ConeGeometry(6, 8, 16),
+      desc: 'Koni. Taban yarıçapı, yükseklik ve çevresindeki dilim sayısı verilir.',
+      code: '// ConeGeometry(radius, height, radialSegments, heightSegments, openEnded)\nconst geometry = new THREE.ConeGeometry(6, 8, 16);' },
+    { g: 0, name: 'Cylinder', make: () => new THREE.CylinderGeometry(4, 4, 8, 12),
+      desc: 'Silindir. Üst ve alt yarıçap farklı olursa kesik koniye dönüşür.',
+      code: '// CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded)\nconst geometry = new THREE.CylinderGeometry(4, 4, 8, 12);' },
+    { g: 0, name: 'Plane', make: () => new THREE.PlaneGeometry(9, 9, 2, 2),
+      desc: 'Tek yüzlü düzlem. Zemin, duvar ve doku yüzeyleri için kullanılır.',
+      code: '// PlaneGeometry(width, height, widthSegments, heightSegments)\nconst geometry = new THREE.PlaneGeometry(9, 9, 2, 2);' },
+    { g: 0, name: 'Ring', make: () => new THREE.RingGeometry(2, 7, 18),
+      desc: 'İç ve dış yarıçap arasında kalan düz bir halka.',
+      code: '// RingGeometry(innerRadius, outerRadius, thetaSegments, phiSegments)\nconst geometry = new THREE.RingGeometry(2, 7, 18);' },
+    { g: 0, name: 'Sphere', make: () => new THREE.SphereGeometry(7, 12, 8),
+      desc: 'Küre. widthSegments ve heightSegments küçükken yüzeylerin tek tek göründüğüne dikkat edin.',
+      code: '// SphereGeometry(radius, widthSegments, heightSegments)\nconst geometry = new THREE.SphereGeometry(7, 12, 8);' },
+    { g: 0, name: 'Torus', make: () => new THREE.TorusGeometry(5, 2, 8, 24),
+      desc: 'Simit. radius ana halkanın, tube borunun yarıçapıdır.',
+      code: '// TorusGeometry(radius, tube, radialSegments, tubularSegments)\nconst geometry = new THREE.TorusGeometry(5, 2, 8, 24);' },
+    { g: 0, name: 'TorusKnot', make: () => new THREE.TorusKnotGeometry(3.5, 1.5, 64, 8, 2, 3),
+      desc: 'Düğüm şeklinde bir simit. p ve q sayıları halkanın kaç kez dolandığını belirler.',
+      code: '// TorusKnotGeometry(radius, tube, tubularSegments, radialSegments, p, q)\nconst geometry = new THREE.TorusKnotGeometry(3.5, 1.5, 64, 8, 2, 3);' },
+
+    { g: 1, name: 'Tetrahedron', make: () => new THREE.TetrahedronGeometry(7),
+      desc: 'Dört yüzlü. detail sıfırdan büyükse yüzeyler bölünür ve şekil küreye yaklaşır.',
+      code: '// TetrahedronGeometry(radius, detail)\nconst geometry = new THREE.TetrahedronGeometry(7);' },
+    { g: 1, name: 'Octahedron', make: () => new THREE.OctahedronGeometry(7),
+      desc: 'Sekiz yüzlü.',
+      code: '// OctahedronGeometry(radius, detail)\nconst geometry = new THREE.OctahedronGeometry(7);' },
+    { g: 1, name: 'Dodecahedron', make: () => new THREE.DodecahedronGeometry(7),
+      desc: 'On iki yüzlü. Yüzleri beşgendir.',
+      code: '// DodecahedronGeometry(radius, detail)\nconst geometry = new THREE.DodecahedronGeometry(7);' },
+    { g: 1, name: 'Icosahedron', make: () => new THREE.IcosahedronGeometry(7),
+      desc: 'Yirmi yüzlü. detail ile bölünerek küre yaklaşımı için sık kullanılır.',
+      code: '// IcosahedronGeometry(radius, detail)\nconst geometry = new THREE.IcosahedronGeometry(7);' },
+    { g: 1, name: 'Polyhedron', make: () => new THREE.PolyhedronGeometry(cubeVerts, cubeFaces, 7, 0),
+      desc: 'Köşeleri ve üçgen indekslerini siz verirsiniz. Köşeler radius yarıçaplı bir kürenin üzerine taşınır.',
+      code: 'const vertices = [-1, -1, -1,  1, -1, -1, /* ... */];   // 8 köşe (x, y, z)\nconst indices = [2, 1, 0,  0, 3, 2, /* ... */];           // 12 üçgen\n// PolyhedronGeometry(vertices, indices, radius, detail)\nconst geometry = new THREE.PolyhedronGeometry(vertices, indices, 7, 0);' },
+
+    { g: 2, name: 'Extrude', make: () => new THREE.ExtrudeGeometry(heartShape(), { steps: 2, depth: 2, bevelEnabled: true, bevelThickness: 1, bevelSize: 1, bevelSegments: 2 }),
+      desc: '2B bir Shape\'e derinlik vererek 3B yapar. Bevel ayarlarıyla kenarlar yuvarlatılır.',
+      code: HEART_CODE + '// ExtrudeGeometry(shape, options)\nconst geometry = new THREE.ExtrudeGeometry(shape, {\n  depth: 2,\n  bevelEnabled: true,\n  bevelThickness: 1,\n  bevelSize: 1,\n  bevelSegments: 2,\n});' },
+    { g: 2, name: 'Lathe', make: () => {
+        const pts = [];
+        for (let i = 0; i < 10; ++i) pts.push(new THREE.Vector2(Math.sin(i * 0.2) * 3 + 3, (i - 5) * 0.8));
+        return new THREE.LatheGeometry(pts, 12);
+      },
+      desc: '2B bir nokta dizisini y ekseni etrafında döndürerek vazo gibi şekiller üretir.',
+      code: 'const points = [];\nfor (let i = 0; i < 10; ++i) {\n  points.push(new THREE.Vector2(Math.sin(i * 0.2) * 3 + 3, (i - 5) * 0.8));\n}\n// LatheGeometry(points, segments)\nconst geometry = new THREE.LatheGeometry(points, 12);' },
+    { g: 2, name: 'Shape', make: () => new THREE.ShapeGeometry(heartShape()),
+      desc: 'Bir Shape\'ten düz ve dolu bir yüzey üretir.',
+      code: HEART_CODE + '// ShapeGeometry(shape, curveSegments)\nconst geometry = new THREE.ShapeGeometry(shape);' },
+    { g: 2, name: 'Tube', make: () => new THREE.TubeGeometry(new CustomSinCurve(4), 20, 1, 8, false),
+      desc: 'Bir eğri boyunca boru çizer. Eğriyi, getPoint(t) yazan bir Curve sınıfıyla kendiniz tanımlayabilirsiniz.',
+      code: 'class CustomSinCurve extends THREE.Curve {\n  getPoint(t, target = new THREE.Vector3()) {\n    return target.set(t * 3 - 1.5, Math.sin(2 * Math.PI * t), 0);\n  }\n}\n// TubeGeometry(path, tubularSegments, radius, radialSegments, closed)\nconst geometry = new THREE.TubeGeometry(new CustomSinCurve(), 20, 1, 8, false);' },
+
+    { g: 3, line: true, name: 'Edges', make: () => new THREE.EdgesGeometry(new THREE.BoxGeometry(8, 8, 8)),
+      desc: 'Başka bir geometrinin yalnızca keskin kenarlarını çizgi olarak verir.',
+      code: '// EdgesGeometry(geometry, thresholdAngle)\nconst geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(8, 8, 8));\nconst lines = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: 0xffffff }));' },
+    { g: 3, line: true, name: 'Wireframe', make: () => new THREE.WireframeGeometry(new THREE.SphereGeometry(7, 12, 8)),
+      desc: 'Başka bir geometrinin her üçgeninin kenarını çizgi olarak verir.',
+      code: '// WireframeGeometry(geometry)\nconst geometry = new THREE.WireframeGeometry(new THREE.SphereGeometry(7, 12, 8));\nconst lines = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: 0xffffff }));' },
+  ];
+
+  (function primitives() {
+    const v = createViewer('prim-canvas', { fov: 40, pos: [0, 1.2, 6.2] });
+    addLights(v.scene, { key: 3, amb: 0.6, pos: [-2, 3, 4] });
+    const back = new THREE.DirectionalLight(0xffffff, 1.5);
+    back.position.set(2, -2, -4);
+    v.scene.add(back);
+
+    const spin = $('prim-spin');
+    const wireCb = $('prim-wire');
+    spin.checked = !reduceMotion;
+    const statsEl = $('prim-ro').querySelector('[data-ro="stats"]');
+    const descEl = $('prim-desc');
+    const codeEl = $('prim-code');
+    const chipsRoot = $('prim-chips');
+
+    let current = null;
+    let currentEntry = null;
+    const buttons = [];
+
+    function select(i) {
+      const e = ENTRIES[i];
+      currentEntry = e;
+      if (current) {
+        v.scene.remove(current);
+        current.geometry.dispose();
+        current.material.dispose();
+      }
+      const geo = e.make();
+      geo.center();
+      geo.computeBoundingSphere();
+      const scale = 1.55 / geo.boundingSphere.radius;
+
+      if (e.line) {
+        current = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: 0xdbe4fa }));
+      } else {
+        current = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+          color: 0x5b7cff, side: THREE.DoubleSide, flatShading: true, roughness: 0.5, metalness: 0.05, wireframe: wireCb.checked,
+        }));
+      }
+      current.scale.setScalar(scale);
+      v.scene.add(current);
+
+      const count = geo.attributes.position.count;
+      statsEl.textContent = e.line
+        ? e.name + 'Geometry · köşe ' + count + ' · çizgi parçası ' + count / 2
+        : e.name + 'Geometry · köşe ' + count + ' · üçgen ' + (geo.index ? geo.index.count : count) / 3;
+
+      descEl.textContent = e.desc;
+      codeEl.innerHTML = window.hl ? window.hl(e.code, 'js') : e.code;
+      wireCb.disabled = !!e.line;
+      buttons.forEach((b, bi) => b.setAttribute('aria-pressed', bi === i ? 'true' : 'false'));
+    }
+
+    GROUPS.forEach((label, gi) => {
+      const title = document.createElement('div');
+      title.className = 'group-label';
+      title.textContent = label;
+      const row = document.createElement('div');
+      row.className = 'chip-group';
+      ENTRIES.forEach((e, i) => {
+        if (e.g !== gi) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip';
+        b.textContent = e.name;
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', () => select(i));
+        buttons[i] = b;
+        row.appendChild(b);
+      });
+      chipsRoot.append(title, row);
+    });
+
+    wireCb.addEventListener('change', () => {
+      if (current && !currentEntry.line) current.material.wireframe = wireCb.checked;
+    });
+
+    v.tick = () => {
+      if (current && spin.checked) {
+        current.rotation.y += v.dt * 0.7;
+        current.rotation.x += v.dt * 0.3;
+      }
+    };
+
+    select(ENTRIES.findIndex((e) => e.name === 'Sphere'));
+    wireCb.checked = true;
+    current.material.wireframe = true;
+  })();
+
+  /* ------------------------------------------------------------------
+     Demo E: Scenegraph (Güneş → Dünya → Ay)
+     ------------------------------------------------------------------ */
+  (function sceneGraph() {
+    const v = createViewer('sg-canvas', { fov: 40, pos: [0, 24, 28], target: [0, 0, 0] });
+    v.scene.name = 'scene';
+    v.scene.background = null;
+
+    const spinners = [];
+
+    const solarSystem = new THREE.Object3D();
+    solarSystem.name = 'solarSystem';
+    v.scene.add(solarSystem);
+    spinners.push(solarSystem);
+
+    const sphereGeometry = new THREE.SphereGeometry(1, 24, 24);
+
+    const sunMesh = new THREE.Mesh(sphereGeometry, new THREE.MeshPhongMaterial({ emissive: 0xffff00 }));
+    sunMesh.name = 'sunMesh';
+    sunMesh.scale.set(5, 5, 5);
+    solarSystem.add(sunMesh);
+    spinners.push(sunMesh);
+
+    const earthOrbit = new THREE.Object3D();
+    earthOrbit.name = 'earthOrbit';
+    earthOrbit.position.x = 10;
+    solarSystem.add(earthOrbit);
+    spinners.push(earthOrbit);
+
+    const earthMesh = new THREE.Mesh(sphereGeometry, new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 }));
+    earthMesh.name = 'earthMesh';
+    earthOrbit.add(earthMesh);
+    spinners.push(earthMesh);
+
+    const moonOrbit = new THREE.Object3D();
+    moonOrbit.name = 'moonOrbit';
+    moonOrbit.position.x = 2;
+    earthOrbit.add(moonOrbit);
+
+    const moonMesh = new THREE.Mesh(sphereGeometry, new THREE.MeshPhongMaterial({ color: 0x888888, emissive: 0x222222 }));
+    moonMesh.name = 'moonMesh';
+    moonMesh.scale.set(0.5, 0.5, 0.5);
+    moonOrbit.add(moonMesh);
+    spinners.push(moonMesh);
+
+    const sunLight = new THREE.PointLight(0xffffff, 500);
+    sunLight.name = 'sunLight';
+    v.scene.add(sunLight);
+
+    /* Eksen ve ızgara yardımcıları */
+    class AxisGridHelper {
+      constructor(node, units) {
+        const axes = new THREE.AxesHelper();
+        axes.material.depthTest = false;
+        axes.renderOrder = 2;
+        axes.userData.helper = true;
+        node.add(axes);
+        const grid = new THREE.GridHelper(units, units);
+        grid.material.depthTest = false;
+        grid.renderOrder = 1;
+        grid.userData.helper = true;
+        node.add(grid);
+        this.grid = grid;
+        this.axes = axes;
+        this.visible = false;
+      }
+      get visible() { return this._visible; }
+      set visible(val) {
+        this._visible = val;
+        this.grid.visible = val;
+        this.axes.visible = val;
+      }
+    }
+
+    const NODES = [
+      ['solarSystem', solarSystem, 26, true],
+      ['sunMesh', sunMesh, 3, false],
+      ['earthOrbit', earthOrbit, 10, true],
+      ['earthMesh', earthMesh, 2.5, false],
+      ['moonOrbit', moonOrbit, 4, true],
+      ['moonMesh', moonMesh, 4, false],
+    ];
+
+    const toggles = $('sg-toggles');
+    NODES.forEach(([name, node, units, on]) => {
+      const helper = new AxisGridHelper(node, units);
+      helper.visible = on;
+      const label = document.createElement('label');
+      label.className = 'ctl';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = on;
+      cb.addEventListener('change', () => { helper.visible = cb.checked; });
+      label.append(cb, document.createTextNode(' ' + name));
+      toggles.appendChild(label);
+    });
+
+    /* Sahne grafiği metni */
+    function treeLines(obj, lines = [], isLast = true, prefix = '') {
+      const local = isLast ? '└─' : '├─';
+      lines.push({ text: prefix + (prefix ? local : '') + (obj.name || obj.type) + ' [' + obj.type + ']', name: obj.name });
+      const kids = obj.children.filter((c) => !c.userData.helper);
+      const np = prefix + (isLast ? '  ' : '│ ');
+      kids.forEach((c, i) => treeLines(c, lines, i === kids.length - 1, np));
+      return lines;
+    }
+    const treeEl = $('sg-tree');
+    const treeSpans = treeLines(v.scene).map((l) => {
+      const s = document.createElement('span');
+      s.className = 'tl';
+      s.textContent = l.text;
+      s.dataset.name = l.name || '';
+      treeEl.appendChild(s);
+      return s;
+    });
+
+    /* Düğüm denetçisi */
+    const pick = $('sg-pick');
+    NODES.forEach(([name]) => {
+      const o = document.createElement('option');
+      o.value = name;
+      o.textContent = name;
+      pick.appendChild(o);
+    });
+    pick.value = 'moonMesh';
+
+    const rows = {};
+    $('sg-inspect').querySelectorAll('tr').forEach((tr) => {
+      rows[tr.dataset.row] = {
+        x: tr.querySelector('[data-v="x"]'),
+        y: tr.querySelector('[data-v="y"]'),
+        z: tr.querySelector('[data-v="z"]'),
+      };
+    });
+
+    function selectedNode() {
+      return NODES.find(([name]) => name === pick.value)[1];
+    }
+    function markTree() {
+      treeSpans.forEach((s) => s.classList.toggle('on', s.dataset.name === pick.value));
+    }
+    pick.addEventListener('change', markTree);
+    markTree();
+
+    const wp = new THREE.Vector3();
+    const ws = new THREE.Vector3();
+
+    /* Sahne üstü etiketler */
+    const stage = $('sg-stage');
+    const labelDefs = [[sunMesh, 'Güneş', -6.2], [earthMesh, 'Dünya', -1.8], [moonMesh, 'Ay', -1.1]];
+    const labels = labelDefs.map(([node, text, dy]) => {
+      const el = document.createElement('div');
+      el.className = 'slabel';
+      el.textContent = text;
+      stage.appendChild(el);
+      return { node, el, dy };
+    });
+    const tmp = new THREE.Vector3();
+
+    const spin = $('sg-spin');
+    const speed = $('sg-speed');
+    const speedOut = $('sg-speed-o');
+    spin.checked = !reduceMotion;
+    speed.addEventListener('input', () => { speedOut.textContent = (+speed.value).toFixed(1) + '×'; });
+
+    v.tick = () => {
+      if (!spin.checked) return;
+      const d = v.dt * 0.5 * +speed.value;
+      spinners.forEach((o) => { o.rotation.y += d; });
+    };
+
+    v.after = () => {
+      const n = selectedNode();
+      n.updateWorldMatrix(true, false);
+      n.getWorldPosition(wp);
+      n.getWorldScale(ws);
+      rows.local.x.textContent = fx(n.position.x);
+      rows.local.y.textContent = fx(n.position.y);
+      rows.local.z.textContent = fx(n.position.z);
+      rows.world.x.textContent = fx(wp.x);
+      rows.world.y.textContent = fx(wp.y);
+      rows.world.z.textContent = fx(wp.z);
+      rows.scale.x.textContent = fx(ws.x);
+
+      const w = v.canvas.clientWidth;
+      const h = v.canvas.clientHeight;
+      labels.forEach(({ node, el, dy }) => {
+        node.updateWorldMatrix(true, false);
+        node.getWorldPosition(tmp);
+        tmp.y += dy;
+        tmp.project(v.camera);
+        el.style.transform = 'translate(-50%, -50%) translate(' + (tmp.x * 0.5 + 0.5) * w + 'px, ' + (tmp.y * -0.5 + 0.5) * h + 'px)';
+        el.style.visibility = tmp.z > 1 ? 'hidden' : 'visible';
+      });
+    };
+  })();
+}
+</script>
+
+</body></html>

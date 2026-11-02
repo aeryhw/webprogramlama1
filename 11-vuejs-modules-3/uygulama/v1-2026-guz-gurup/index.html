@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biyom Atlası | Vue 3 Faz 1 Canlı Görsel Sunum</title>
+  <!-- FontAwesome Icons & Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    :root {
+      --bg: #06100a;
+      --panel: #0c1a12;
+      --panel2: #10231a;
+      --line: #24442f;
+      --text: #f1f8ee;
+      --muted: #a5bfa0;
+      --teal: #8be04e;
+      --blue: #7bc7ff;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.15) 0.6px, transparent 0.8px),
+                        radial-gradient(rgba(121, 186, 255, 0.12) 0.7px, transparent 1px);
+      background-size: 73px 73px, 117px 117px;
+      background-position: 0 0, 35px 48px;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    /* Header & Nav */
+    .top {
+      height: auto;
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 12px 3%;
+      background: rgba(6, 16, 10, 0.94);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(12px);
+    }
+    .logo { font-size: 24px; font-weight: 850; white-space: nowrap; }
+    .logo span { color: var(--teal); }
+    
+    /* Presentation Header Toolbar */
+    .topic-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0;
+      scrollbar-width: none;
+    }
+    .topic-pills::-webkit-scrollbar { display: none; }
+    .pill-btn {
+      background: #14291c;
+      border: 1px solid var(--line);
+      color: #a5bfa0;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill-btn:hover { color: white; border-color: var(--teal); background: #1d3d2a; }
+    .pill-btn.active {
+      background: var(--teal);
+      color: #06100a;
+      border-color: var(--teal);
+      box-shadow: 0 0 15px rgba(139, 224, 78, 0.5);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 45px 3% 32px;
+      min-height: 250px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, #06100a 0%, rgba(6, 16, 10, 0.87) 38%, rgba(6, 16, 10, 0.12) 100%),
+                  radial-gradient(ellipse at 75% 45%, #1e6ba5 0%, #0c2446 24%, transparent 55%);
+    }
+    .hero:after {
+      content: "";
+      position: absolute;
+      right: 7%;
+      top: 18px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, #bdefff, #2d83c6 24%, #17436e 55%, #07172d 73%);
+      box-shadow: inset -25px -10px 35px #000a, 0 0 60px rgba(26, 156, 255, 0.4);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .eyebrow { color: var(--teal); letter-spacing: 3px; font-size: 12px; font-weight: 800; }
+    .hero h1 { font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; margin: 10px 0; max-width: 580px; letter-spacing: -1px; }
+    .hero h1 span { color: var(--teal); }
+    .hero p { color: #cfe0c6; max-width: 520px; font-size: 15px; }
+    .btn {
+      border: 1px solid #4a7a52;
+      border-radius: 11px;
+      padding: 10px 16px;
+      background: #14291c;
+      color: white;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: #1f4630; border-color: var(--teal); }
+    .btn.primary { background: var(--teal); color: #0a1405; border-color: var(--teal); }
+
+    /* Main Grid Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr) 310px;
+      gap: 16px;
+      padding: 0 3% 22px;
+      position: relative;
+    }
+    .panel {
+      background: linear-gradient(145deg, rgba(12, 26, 18, 0.96), rgba(8, 18, 12, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: visible;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .panelhead {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(16, 35, 26, 0.4);
+      border-radius: 14px 14px 0 0;
+    }
+
+    /* Planet Item & Orbs */
+    .planetlist { padding: 8px; }
+    .planet {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 0;
+      background: transparent;
+      color: #e1efd9;
+      width: 100%;
+      text-align: left;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .planet:hover, .planet.active { background: #1c4a2c; color: white; }
+    .orb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      box-shadow: inset -6px -4px 8px #0008, 0 0 10px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s;
+    }
+    .planet:hover .orb { transform: scale(1.1); }
+
+    
+
+    /* Solar Stage */
+    .stage {
+      min-height: 330px;
+      position: relative;
+      background: radial-gradient(ellipse at 50% 50%, #071d38, #020914 70%);
+      padding: 20px;
+      border-radius: 0 0 14px 14px;
+    }
+    .switch {
+      display: flex;
+      gap: 5px;
+      background: #0a170f;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 4px;
+    }
+    .switch button {
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: #c0d6b8;
+      padding: 5px 11px;
+      font-size: 12px;
+    }
+    .switch button.active { background: var(--teal); color: #0a1405; font-weight: 800; }
+    .solar {
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.5s ease;
+    }
+    .orbit {
+      position: absolute;
+      border: 1px solid rgba(110, 160, 100, 0.27);
+      border-radius: 50%;
+      width: 105%;
+      height: 220px;
+      transform: scaleY(0.7);
+      pointer-events: none;
+    }
+    .sun {
+      width: 70px;
+      height: 70px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff4a3, #ffb52e 45%, #e94c18 75%);
+      box-shadow: 0 0 35px #ff922c, 0 0 75px rgba(255, 106, 26, 0.47);
+      z-index: 1;
+    }
+    .planetitem {
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 8px;
+      color: #e1efd9;
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 40px;
+      transition: all 0.3s;
+    }
+    .planetitem .orb { width: clamp(22px, 3vw, 40px); height: clamp(22px, 3vw, 40px); }
+    .planetitem:hover { color: var(--teal); transform: translateY(-4px); }
+
+    /* Facts Column */
+    .facts { padding: 18px; }
+    .planetbig { display: flex; gap: 15px; align-items: center; }
+    .planetbig .orb { width: 60px; height: 60px; }
+    .facts h2 { margin: 0; font-size: 22px; font-weight: 800; }
+    .muted { color: var(--muted); }
+    .facts p { color: #c9dcc0; font-size: 13.5px; line-height: 1.5; margin: 10px 0; }
+    .factrow {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding: 8px 0;
+      color: #bdd2b4;
+      font-size: 13px;
+    }
+    .factrow strong { color: white; text-align: right; }
+    .detail {
+      margin-top: 10px;
+      width: 100%;
+      border: 1px solid var(--teal);
+      color: var(--teal);
+      background: transparent;
+      border-radius: 9px;
+      padding: 9px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .detail:hover { background: rgba(139, 224, 78, 0.1); }
+
+    /* Cards Section */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 0 3% 22px; }
+    .feature {
+      padding: 18px;
+      background: linear-gradient(130deg, #0f2016, #08130c);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .feature .symbol { font-size: 26px; margin-bottom: 6px; }
+    .feature h3 { margin: 4px 0; font-size: 17px; font-weight: 700; }
+    .feature p { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+    .feature button { color: var(--teal); background: transparent; border: 0; font-weight: 700; }
+
+    .footer {
+      padding: 18px 3%;
+      border-top: 1px solid var(--line);
+      color: #94ad8c;
+      font-size: 12.5px;
+      display: flex;
+      justify-content: space-between;
+      background: #040a06;
+    }
+
+    /* =========================================================
+       ON-SCREEN DIRECT VISUAL ANNOTATIONS & OVERLAYS ("İŞARETÇİLER")
+       ========================================================= */
+    
+    /* Glowing Border for Active Target Elements */
+    .target-highlight {
+      outline: 3px solid var(--teal) !important;
+      outline-offset: 4px;
+      box-shadow: 0 0 30px rgba(139, 224, 78, 0.7), inset 0 0 15px rgba(139, 224, 78, 0.2) !important;
+      z-index: 30 !important;
+      animation: pulseHighlight 2s infinite alternate;
+    }
+
+    @keyframes pulseHighlight {
+      0% { outline-color: var(--teal); box-shadow: 0 0 25px rgba(139, 224, 78, 0.6); }
+      100% { outline-color: #f59e0b; box-shadow: 0 0 35px rgba(245, 158, 11, 0.8); }
+    }
+
+    /* Floating Pointed Banner Attached Directly On Element */
+    .concept-annotation-badge {
+      position: absolute;
+      z-index: 50;
+      background: linear-gradient(135deg, #123220, #08170e);
+      border: 2px solid var(--teal);
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(139, 224, 78, 0.4);
+      max-width: 380px;
+      width: calc(100% - 20px);
+      pointer-events: auto;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.7) translateY(-10px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* Pointing Triangle Arrow */
+    .concept-annotation-badge::before {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    /* Top/Bottom Arrow placement variants */
+    .arrow-top::before {
+      top: -12px; left: 30px;
+      border-width: 0 10px 12px 10px;
+      border-color: transparent transparent var(--teal) transparent;
+    }
+    .arrow-bottom::before {
+      bottom: -12px; left: 30px;
+      border-width: 12px 10px 0 10px;
+      border-color: var(--teal) transparent transparent transparent;
+    }
+
+    
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 210px minmax(0, 1fr); }
+      .rightcol { grid-column: 2; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .top { flex-direction: column; align-items: stretch; }
+      .layout { grid-template-columns: 1fr; }
+      .leftcol, .rightcol { grid-column: 1; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  
+/* ===== BİYOM TEMASI ===== */
+.b-desert{--orb:radial-gradient(circle at 35% 30%,#ffe3a0,#e0a850 35%,#b8742c 65%,#5a3414);--sky:linear-gradient(180deg,#2a1608,#7a4a1c 55%,#1f1007);--glow:rgba(240,170,70,.35);--emo:"🏜️";--deco:"🌵 🐪 🌵 🦂 🌵 🐪";}
+.b-rainforest{--orb:radial-gradient(circle at 35% 30%,#7dff9a,#1fa04a 35%,#0d5a2c 65%,#04200f);--sky:linear-gradient(180deg,#02140a,#0b4a24 55%,#02100a);--glow:rgba(60,220,110,.35);--emo:"🌴";--deco:"🌴 🦜 🌿 🐒 🌴 🦋";}
+.b-savanna{--orb:radial-gradient(circle at 35% 30%,#ffe08a,#c9a43a 35%,#7a7a22 65%,#2e3010);--sky:linear-gradient(180deg,#2a1c08,#7a5a16 55%,#1c1408);--glow:rgba(230,190,70,.35);--emo:"🦁";--deco:"🌳 🦒 🌾 🐘 🌳 🦓";}
+.b-steppe{--orb:radial-gradient(circle at 35% 30%,#d6f08a,#8fb84a 35%,#5a7a2a 65%,#222f10);--sky:linear-gradient(180deg,#121d0a,#4a6428 55%,#101808);--glow:rgba(170,215,90,.35);--emo:"🌾";--deco:"🌾 🦅 🌾 🐇 🌾 🐎";}
+.b-temperate{--orb:radial-gradient(circle at 35% 30%,#9be08a,#3c9a4a 35%,#1f5a38 65%,#0a2415);--sky:linear-gradient(180deg,#08180e,#1f5a3a 55%,#06120a);--glow:rgba(90,200,110,.35);--emo:"🍂";--deco:"🌳 🦌 🍁 🐻 🌳 🍄";}
+.b-taiga{--orb:radial-gradient(circle at 35% 30%,#bfe8d8,#4a8a78 35%,#245a52 65%,#0a2226);--sky:linear-gradient(180deg,#06141a,#1f4a4a 55%,#050f12);--glow:rgba(110,200,190,.35);--emo:"🌲";--deco:"🌲 🐺 🌲 🦌 🌲 ❄️";}
+.b-tundra{--orb:radial-gradient(circle at 35% 30%,#ffffff,#cfe8f5 35%,#7fa8c0 65%,#2a4560);--sky:linear-gradient(180deg,#0a1622,#4a6a86 55%,#08101a);--glow:rgba(170,215,245,.35);--emo:"❄️";--deco:"❄️ 🦊 🦌 🐧 ❄️ 🐻‍❄️";}
+.b-wetland{--orb:radial-gradient(circle at 35% 30%,#c8e8a8,#6aa05a 35%,#3a6a4a 65%,#122a22);--sky:linear-gradient(180deg,#081a14,#2a5a3c 55%,#06120e);--glow:rgba(130,210,150,.35);--emo:"🪷";--deco:"🌿 🦩 🪷 🐸 🌿 🦆";}
+.b-reef{--orb:radial-gradient(circle at 35% 30%,#7af0ff,#1aa0d0 35%,#0a5a9a 65%,#03203f);--sky:linear-gradient(180deg,#021626,#0a5a80 55%,#020e1a);--glow:rgba(70,200,255,.35);--emo:"🪸";--deco:"🪸 🐠 🐢 🐙 🪸 🐟";}
+.orb{background:var(--orb);display:inline-flex;align-items:center;justify-content:center;font-size:15px}
+.orb::after{content:var(--emo);line-height:1}
+.planetitem .orb{font-size:clamp(12px,1.7vw,22px)}
+.planetbig .orb{font-size:32px}
+.stage{background:var(--sky);overflow:hidden}
+.stage::before{content:var(--deco);position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:26px;letter-spacing:14px;opacity:.38;pointer-events:none;white-space:nowrap;overflow:hidden}
+/* Hafif hareketli sahne arka planı */
+.stage{background-size:100% 170%;animation:skyShift 16s ease-in-out infinite alternate}
+.stage::before{animation:decoSway 7s ease-in-out infinite alternate}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background-image:radial-gradient(circle,var(--glow) 0 2px,transparent 3px),radial-gradient(circle,var(--glow) 0 1.5px,transparent 2.5px),radial-gradient(circle,rgba(255,255,255,.35) 0 1px,transparent 2px);
+  background-size:130px 150px,90px 110px,170px 190px;background-position:0 0,40px 60px,80px 20px;
+  animation:driftUp 24s linear infinite}
+@keyframes skyShift{from{background-position:0 0}to{background-position:0 100%}}
+@keyframes decoSway{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes driftUp{from{background-position:0 0,40px 60px,80px 20px}to{background-position:30px -150px,10px -110px,60px -190px}}
+@media (prefers-reduced-motion:reduce){.stage,.stage::before,.stage::after{animation:none}}
+.sun{background:var(--orb);box-shadow:0 0 35px var(--glow),0 0 75px var(--glow),inset -10px -6px 14px #0008;display:flex;align-items:center;justify-content:center}
+.sun::after{content:var(--emo);font-size:56px}
+.orb,.sun,.hero:after{background:none!important;box-shadow:none!important}
+.orb{font-size:22px}
+.planetitem .orb{font-size:clamp(24px,3.2vw,38px)}
+.planetbig .orb{font-size:48px}
+.hero:after{font-size:130px;filter:drop-shadow(0 0 30px var(--glow))}
+.search{background:#10231a;border:1px solid var(--line);border-radius:20px;color:var(--text);padding:8px 16px;width:230px;max-width:100%;font-size:13px;outline:none;transition:all .2s}
+.search::placeholder{color:var(--muted)}
+.search:hover{border-color:#4a7a52}
+.search:focus{border-color:var(--teal);background:#14291c;box-shadow:0 0 15px rgba(139,224,78,.35)}
+@media (max-width:720px){.search{width:100%}}
+.hero{background:linear-gradient(90deg,#06100a 0%,rgba(6,16,10,.87) 38%,rgba(6,16,10,.1) 100%),radial-gradient(ellipse at 75% 45%,var(--glow) 0%,transparent 55%)}
+.hero:after{background:var(--orb);box-shadow:inset -25px -10px 35px #000a,0 0 60px var(--glow);content:var(--emo);font-size:100px;display:flex;align-items:center;justify-content:center}
+body{background-image:radial-gradient(rgba(190,255,150,.10) .6px,transparent .8px),radial-gradient(rgba(139,224,78,.08) .7px,transparent 1px)}
+  </style>
+</head>
+<body>
+
+  <!-- STICKY HEADER WITH TOPIC PILLS -->
+  <header class="top">
+    <div class="flex items-center gap-3">
+      <div class="logo">🌿 Biyom <span>Atlası</span></div>
+      <span id="storeChip" class="text-xs text-lime-300 font-mono" title="Aktif biyom">📍 Çöl</span>
+      <span id="watchStatus" class="text-xs font-mono" style="color:#a3e635">✅ Hazır</span>
+    </div>
+
+    <!-- 6 Interactive Concept Pills -->
+    <div class="topic-pills" id="topicPills">
+      <button class="pill-btn active" data-topic="1">
+        <span>📍 1. Koşullu Render</span>
+      </button>
+      <button class="pill-btn" data-topic="2">
+        <span>📍 2. Liste Render</span>
+      </button>
+      <button class="pill-btn" data-topic="3">
+        <span>📍 3. İzleyiciler</span>
+      </button>
+      <button class="pill-btn" data-topic="4">
+        <span>📍 4. Şablon Ref'leri</span>
+      </button>
+      <button class="pill-btn" data-topic="5">
+        <span>📍 5. Yaşam Döngüsü</span>
+      </button>
+      <button class="pill-btn" data-topic="6">
+        <span>📍 6. Durum Yönetimi</span>
+      </button>
+    </div>
+
+    <div id="searchRefApp"></div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero b-desert" id="home">
+    <div class="eyebrow">SCÜ ŞARKIŞLA UBYO — WEB PROGRAMLAMA I</div>
+    <h1>Biyom <span>Atlası</span></h1>
+  </section>
+
+  <!-- MAIN INTERACTIVE LAYOUT -->
+  <div class="layout" id="mainLayout">
+
+    <!-- LEFT SIDEBAR: PLANET LIST (LIST RENDERING / v-for TARGET) -->
+    <aside class="panel leftcol" id="target-list-panel">
+      <!-- Direct Annotation Badge will attach here -->
+      <div class="panelhead">
+        <span>🌿 Biyomlar Listesi</span>
+        <span class="text-xs text-lime-400 font-mono" id="planetCountBadge">8 Öğe</span>
+      </div>
+      <div class="planetlist" id="planetlist"></div>
+
+      <div class="panelhead mt-2">
+        <span>🗺 Diğer Alanlar</span>
+      </div>
+      <div class="planetlist">
+        <button class="planet" data-other="Dağ">⛰ Dağ Ekosistemleri</button>
+        <button class="planet" data-other="Adalar">🏝 Adalar</button>
+        <button class="planet" data-other="Delta">🌊 Nehir Deltaları</button>
+      </div>
+    </aside>
+
+    <!-- CENTER: SOLAR STAGE (TEMPLATE REFS & LIFECYCLE TARGET) -->
+    <section class="panel" id="target-stage-panel">
+      <div class="panelhead">
+        <span class="flex items-center gap-2">
+          🌍 Biyom Sahnesi
+        </span>
+        <div class="switch">
+          <button id="fullscreen" title="Büyüt">⛶</button>
+        </div>
+      </div>
+      <div class="stage b-desert" id="stage">
+        <div class="solar" id="solarview">
+          <div class="orbit"></div>
+          <div class="sun" title="Dünya"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDEBAR: PLANET FACTS & DETAILS (CONDITIONAL RENDER & WATCHER TARGET) -->
+    <aside class="panel rightcol" id="target-facts-panel">
+      <div class="panelhead">✦ Biyom Bilgisi</div>
+      <div class="facts">
+        <div class="planetbig">
+          <span class="orb b-desert" id="bigorb"></span>
+          <div>
+            <h2 id="pname">Çöl</h2>
+            <div class="muted" id="position">1. Biyom</div>
+          </div>
+        </div>
+        <p id="desc">Dünya, Biyom'nde yaşam barındırdığı bilinen tek biyomdir.</p>
+
+        <div class="factrow"><span>💧 Yıllık Yağış</span><strong id="diameter">< 250 mm</strong></div>
+        <div class="factrow"><span>🌡 Sıcaklık</span><strong id="temp">38 °C (gündüz)</strong></div>
+        <div class="factrow"><span>🌱 Bitki Örtüsü</span><strong id="day">Kaktüs, çalı</strong></div>
+        <div class="factrow"><span>🐾 Tipik Canlılar</span><strong id="year">Deve, akrep</strong></div>
+
+        <!-- CONDITIONAL RENDER AREA -->
+        <div id="conditional-render-zone" class="mt-3 p-2 border border-slate-700/50 rounded-lg">
+          
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- CARDS SECTION -->
+  <section class="cards">
+    <article class="feature" id="galaxies">
+      <div class="symbol">🌳</div>
+      <h3>Ekosistemler</h3>
+      <p>Canlıların ve çevrenin oluşturduğu dev sistemleri keşfet.</p>
+      <button onclick="showInfo('Ekosistemler','Ekosistem; canlılar ile cansız çevrenin birlikte oluşturduğu bütünlüktür.')">Ekosistemleri incele →</button>
+    </article>
+    <article class="feature" id="discoveries">
+      <div class="symbol">🦋</div>
+      <h3>Biyoçeşitlilik</h3>
+      <p>Dünyadaki yaşamın çeşitliliğine tanık ol.</p>
+      <button onclick="showInfo('Biyoçeşitlilik','Bir bölgedeki tür, gen ve ekosistem çeşitliliğine biyoçeşitlilik denir.')">Türleri gör →</button>
+    </article>
+    <article class="feature" id="target-store-card">
+      <div class="symbol">💡</div>
+      <h3>İlginç Bilgiler (reactive store)</h3>
+      <p>Store üzerinde tutulan aktif biyom verisi.</p>
+      <p id="storeView" class="text-xs font-mono text-lime-300 mt-1"></p>
+      <button onclick="showInfo('İlginç Bilgiler','Develer sırtlarında su değil, yağ depolar.')">Bilgileri oku →</button>
+    </article>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>Biyom Atlası | SCÜ Şarkışla UBYO - Web Programlama I | 3. Takım (gurup) · Emine Avcıbaşı · Elif Yazıcı · İbrahim Kurnaz</span>
+    <span>Doğa, keşfetmek için var.</span>
+  </footer>
+
+  <!-- DYNAMIC ANNOTATION BADGE CONTAINER (JS injects pointing overlay here) -->
+  <div id="annotationOverlay" class="concept-annotation-badge hidden"></div>
+
+  <!-- Vue 3 -->
+  <script src="vue.global.prod.js"></script>
+  <script>window.Vue || document.write('<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"><\/script>');</script>
+
+  <!-- JAVASCRIPT APP & ANNOTATION ENGINE -->
+  <script>
+    // DATA MODEL
+    let planets = [
+ {
+  "name": "Çöl",
+  "cls": "desert",
+  "pos": "1. Biyom",
+  "diam": "< 250 mm",
+  "temp": "38 °C (gündüz)",
+  "day": "Kaktüs, çalı",
+  "year": "Deve, akrep",
+  "desc": "Yılda 250 mm’den az yağış alan, kurak ve seyrek bitki örtülü biyomdur.",
+  "extra": "Sahra dünyanın en büyük sıcak çölüdür; geceleri sıcaklık hızla düşer."
+ },
+ {
+  "name": "Yağmur Ormanı",
+  "cls": "rainforest",
+  "pos": "2. Biyom",
+  "diam": "2000+ mm",
+  "temp": "26 °C",
+  "day": "Çok katlı orman",
+  "year": "Jaguar, papağan",
+  "desc": "Sıcak ve nemli; canlı çeşitliliğinin en yüksek olduğu biyomlardan biridir.",
+  "extra": "Amazon, dünyanın en büyük tropikal yağmur ormanıdır."
+ },
+ {
+  "name": "Savan",
+  "cls": "savanna",
+  "pos": "3. Biyom",
+  "diam": "500–1300 mm",
+  "temp": "25 °C",
+  "day": "Ot, akasya",
+  "year": "Aslan, zürafa",
+  "desc": "Seyrek ağaçlı geniş otlaklardır; yağışlı ve kurak mevsim belirgindir.",
+  "extra": "Serengeti’deki büyük göçler mevsimsel yağışları izler."
+ },
+ {
+  "name": "Bozkır",
+  "cls": "steppe",
+  "pos": "4. Biyom",
+  "diam": "250–500 mm",
+  "temp": "10 °C",
+  "day": "Kısa otlar",
+  "year": "Tavşan, kartal",
+  "desc": "Ağaçsız, kısa otlarla kaplı; yazlar sıcak, kışlar soğuk iç bölgelerdir.",
+  "extra": "Orta Anadolu’nun büyük bölümü bozkır biyomudur."
+ },
+ {
+  "name": "Ilıman Orman",
+  "cls": "temperate",
+  "pos": "5. Biyom",
+  "diam": "750–1500 mm",
+  "temp": "10 °C",
+  "day": "Meşe, kayın",
+  "year": "Geyik, ayı",
+  "desc": "Dört mevsimin yaşandığı, yaprak döken ağaçlarla kaplı ormanlardır.",
+  "extra": "Sonbaharda dökülen yapraklar toprağı besler."
+ },
+ {
+  "name": "Tayga",
+  "cls": "taiga",
+  "pos": "6. Biyom",
+  "diam": "300–900 mm",
+  "temp": "−5 °C",
+  "day": "Çam, ladin",
+  "year": "Boz ayı, kurt",
+  "desc": "Dünyanın en geniş kara biyomlarından biri; iğne yapraklı ormanlardır.",
+  "extra": "Kuzey Yarımküre’de kutup çevresini bir kuşak gibi sarar."
+ },
+ {
+  "name": "Tundra",
+  "cls": "tundra",
+  "pos": "7. Biyom",
+  "diam": "< 250 mm",
+  "temp": "−25 °C (kış)",
+  "day": "Yosun, liken",
+  "year": "Ren geyiği, kutup tilkisi",
+  "desc": "Soğuk ve ağaçsızdır; toprağın derini yıl boyu donuktur (permafrost).",
+  "extra": "Yazın kısa süre eriyen yüzey, bataklıklar oluşturur."
+ },
+ {
+  "name": "Sulak Alan",
+  "cls": "wetland",
+  "pos": "8. Biyom",
+  "diam": "Değişken",
+  "temp": "15 °C",
+  "day": "Sazlık, nilüfer",
+  "year": "Flamingo, kurbağa",
+  "desc": "Suyla kaplı ya da doygun alanlar; kuşlar için kritik yaşam alanıdır.",
+  "extra": "Sulak alanlar suyu süzer ve taşkınları azaltır."
+ }
+];
+    
+    let activePlanet = planets[0];
+    const vueListState = Vue.reactive({ searchQuery: '', warmOnly: false, selectedName: 'Çöl' });
+    const detailState = Vue.reactive({ open: false, text: '', temp: '' });
+    const store = Vue.reactive({
+      activeBiome: 'Çöl',
+      setActive(name) { this.activeBiome = name; } // action: mutasyon store içinde
+    });
+    let plutoState = false;
+
+    // VUE 3: Sol biyom listesi v-for + computed ile oluşturulur.
+    // Sahnedeki dekoratif biyom noktaları aşağıda aynı veriyle güncellenir.
+    function renderPlanets() {
+      if (window.vueBiomeList) {
+        window.vueBiomeList.setFilter(onlyWarm);
+        window.vueBiomeList.setSelected(activePlanet.name);
+      }
+      const solar = document.getElementById('solarview');
+      solar.querySelectorAll('.planetitem').forEach(el => el.remove());
+      visiblePlanets().forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'planetitem';
+        item.dataset.name = p.name;
+        item.innerHTML = `<span class="orb b-${p.cls}"></span><span>${p.name}</span>`;
+        item.onclick = () => selectPlanet(p);
+        solar.appendChild(item);
+      });
+      const badge = document.getElementById('planetCountBadge');
+      if (badge) badge.textContent = (onlyWarm ? `${visiblePlanets().length}/${planets.length} Öğe` : `${planets.length} Öğe`);
+    }
+
+    function selectPlanet(p) {
+      const prevName = activePlanet.name;
+      activePlanet = p;
+      if (window.vueBiomeList) window.vueBiomeList.setSelected(p.name);
+
+      document.getElementById('bigorb').className = 'orb b-' + p.cls;
+      document.getElementById('home').className = 'hero b-' + p.cls;
+      document.getElementById('stage').className = 'stage b-' + p.cls;
+      document.getElementById('pname').textContent = p.name;
+      document.getElementById('position').textContent = p.pos;
+      document.getElementById('diameter').textContent = p.diam;
+      document.getElementById('temp').textContent = p.temp;
+      document.getElementById('day').textContent = p.day;
+      document.getElementById('year').textContent = p.year;
+      document.getElementById('desc').textContent = p.desc;
+      
+      detailState.open = false; detailState.text = p.extra; detailState.temp = p.temp;
+
+      store.setActive(p.name);
+      logConsole(`WATCHER TETİKLENDİ: watch(selectedBiome) -> '${prevName}' değişti '${p.name}' oldu.`);
+    }
+
+    // CONSOLE LOG HELPER
+    function logConsole(msg) { /* log çubuğu kaldırıldı */ }
+
+
+    // Gerçek Vue 3 Template Ref: arama inputu Vue bileşeninin template'i içinde.
+    const searchRefApp = Vue.createApp({
+      setup() {
+        const aramaKutusu = Vue.ref(null);
+        window.aramaKutusuRef = aramaKutusu;
+        return { aramaKutusu, vueListState };
+      },
+      template: `<input ref="aramaKutusu" v-model.trim="vueListState.searchQuery" @keyup.esc="vueListState.searchQuery = ''" class="search" id="search" placeholder="⌕ Biyom ara...">`
+    });
+    searchRefApp.mount('#searchRefApp');
+
+    // SEARCH: v-model değerini watch ile izle, sahnedeki noktaları süz
+    Vue.watch(() => vueListState.searchQuery, q => {
+      const s = q.toLocaleLowerCase('tr');
+      document.querySelectorAll('.planetitem').forEach(x => {
+        x.classList.toggle('hidden', !x.dataset.name.toLocaleLowerCase('tr').includes(s));
+      });
+    });
+
+    // 2D/3D
+
+    function showInfo(title, body) {
+      document.getElementById('pname').textContent = title;
+      document.getElementById('desc').textContent = body;
+      detailState.open = false;
+    }
+
+    // =========================================================
+    // VISUAL ANNOTATION OVERLAY ENGINE (İŞARETÇİ SİSTEMİ)
+    // =========================================================
+
+    const annotations = {
+      1: {
+        title: "📍 1. KOŞULLU RENDER BU BÖLGE!",
+        targetId: "target-facts-panel",
+        desc: "Bu buton ve detay metni <code>v-show</code> örneğidir: element DOM'da kalır, sadece CSS ile gizlenir ve gösterilir. <code>v-if</code> olsaydı element DOM'dan tamamen silinip yeniden oluşturulurdu.",
+        actionsHtml: `
+          <button class="btn primary text-xs py-1.5 px-3" onclick="document.getElementById('detail').click()">
+            Detayı Aç/Kapat
+          </button>
+        `,
+        arrow: "arrow-top"
+      },
+      2: {
+        title: "📍 2. LİSTE RENDER ETME (v-for) BU BÖLGE!",
+        targetId: "target-list-panel",
+        desc: "Sol taraftaki biyom listesi gerçek Vue 3 bileşenidir. <code>v-for</code> listeyi oluşturur; <code>computed</code> arama ve sıcaklık filtresini uygular; veri değişince görünüm otomatik güncellenir.",
+        actionsHtml: ``,
+        arrow: "arrow-top"
+      },
+      3: {
+        title: "📍 3. İZLEYİCİLER (WATCHERS) BU BÖLGE!",
+        targetId: "watchStatus",
+        desc: "Seçili biyom değiştiğinde Vue 3 <code>watch()</code> bunu yakalar ve yan etki başlatır (slayttaki hava durumu isteği gibi): önce <b>Yükleniyor…</b>, veri gelince <b>Hazır</b> görünür. Arka arkaya seçersen eski istek iptal edilir, sadece sonuncusu yazılır.",
+        actionsHtml: `
+          <button class="btn primary text-xs py-1 px-2" onclick="storeDemo()">
+            Sıradaki Biyomu Seç
+          </button>
+        `,
+        arrow: "arrow-top"
+      },
+      4: {
+        title: "📍 4. ŞABLON REFERANSLARI (refs) BU BÖLGE!",
+        targetId: "target-stage-panel",
+        desc: "Biyom sahnesi, <code>ref</code> ile doğrudan DOM öğesi olarak yakalanır. Genişlik ve yükseklik gibi ölçüler, odaklanma gibi ham DOM işlemleri bu köprüyle yapılır.",
+        actionsHtml: `
+          <button class="btn primary text-xs py-1 px-2" onclick="measureStage()">
+            Sahneyi ref Üzerinden Ölç
+          </button>
+        `,
+        arrow: "arrow-top"
+      },
+      5: {
+        title: "📍 5. YAŞAM DÖNGÜSÜ KANCALARI BU BÖLGE!",
+        targetId: "target-stage-panel",
+        desc: "Biyom sahnesi bir bileşen gibi yaşar: sayfaya yerleşir (<code>onMounted</code>), biyom değişince yenilenir (<code>onUpdated</code>), kaldırılırken temizlenir (<code>onUnmounted</code>). Butonla 7 adımı sahne üzerinde izleyin.",
+        actionsHtml: ``,
+        arrow: "arrow-top"
+      },
+      6: {
+        title: "📍 6. DURUM YÖNETİMİ BU BÖLGE!",
+        targetId: "target-store-card",
+        desc: "Seçili biyom (Örn: 'Çöl') tek bir merkezi veride tutulur. Başlıktaki etiket, bu kart ve bilgi paneli aynı veriyi prop drilling yapmadan okur. (Gerçek projede bunu Pinia yapar.)",
+        actionsHtml: `
+          <button class="btn primary text-xs py-1 px-2" onclick="readBiome()">
+            Biyom Verisini Oku
+          </button>
+        `,
+        arrow: "arrow-bottom"
+      }
+    };
+
+    function showTopicAnnotation(topicId) {
+      // Deactivate all targets
+      document.querySelectorAll('.target-highlight').forEach(el => el.classList.remove('target-highlight'));
+      
+      // Update pills
+      document.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.topic == topicId);
+      });
+
+      const config = annotations[topicId];
+      if (!config) return;
+
+      const targetEl = document.getElementById(config.targetId);
+      if (!targetEl) return;
+
+      // Add Glowing Border
+      targetEl.classList.add('target-highlight');
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Position the Floating Overlay Badge Directly Near the Target
+      const badge = document.getElementById('annotationOverlay');
+      badge.className = `concept-annotation-badge ${config.arrow}`;
+      badge.innerHTML = `
+        <div class="flex items-center justify-between gap-2 border-b border-lime-500/30 pb-2 mb-2">
+          <span class="font-extrabold text-lime-300 text-sm">${config.title}</span>
+          <button onclick="hideAnnotation()" class="text-slate-400 hover:text-white text-xs font-bold px-1">✕</button>
+        </div>
+        <p class="text-xs text-slate-200 leading-relaxed mb-2">${config.desc}</p>
+        <div class="mt-2 flex flex-wrap gap-1 justify-end">${config.actionsHtml}${extraActions[topicId] || ''}</div>
+      `;
+
+      // Calculate coordinates to attach overlay
+      const rect = targetEl.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+      badge.classList.remove('hidden');
+
+      // Attachment Position Logic
+      if (config.arrow === 'arrow-top') {
+        badge.style.top = (rect.bottom + scrollTop + 12) + 'px';
+        badge.style.left = Math.max(10, (rect.left + scrollLeft)) + 'px';
+      } else {
+        badge.style.top = (rect.top + scrollTop - badge.offsetHeight - 15) + 'px';
+        badge.style.left = Math.max(10, (rect.left + scrollLeft)) + 'px';
+      }
+
+      logConsole(`${config.title} ekranda işaretlendi ve açıklaması eklendi.`);
+    }
+
+    function hideAnnotation() {
+      document.getElementById('annotationOverlay').classList.add('hidden');
+      document.querySelectorAll('.target-highlight').forEach(el => el.classList.remove('target-highlight'));
+    }
+
+    
+
+    // =========================================================
+    // EK CANLI DEMOLAR
+    // =========================================================
+
+    // Ekranda görünen kısa bildirim (log çubuğu yerine)
+    let sayTimer;
+    function say(msg, ms = 3500) {
+      let t = document.getElementById('sayToast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'sayToast';
+        t.style.cssText = 'position:fixed;top:84px;left:50%;transform:translateX(-50%);max-width:min(92vw,640px);padding:10px 16px;background:rgba(15,23,42,.95);border:1px solid #a3e635;border-radius:12px;color:#d9f99d;font-size:13px;line-height:1.5;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4);text-align:center';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg; t.style.display = 'block';
+      clearTimeout(sayTimer); sayTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
+    }
+    function measureStage() {
+      const st = relStage();
+      const old = document.getElementById('measureBox'); if (old) old.remove();
+      const w = st.clientWidth, h = st.clientHeight;
+      const box = document.createElement('div'); box.id = 'measureBox';
+      box.style.cssText = 'position:absolute;inset:0;border:3px dashed #a3e635;border-radius:12px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:6;background:rgba(163,230,53,.08)';
+      box.innerHTML = `<span style="background:rgba(15,23,42,.9);color:#d9f99d;padding:6px 14px;border-radius:10px;font-weight:700;font-size:15px">📏 ${w} × ${h} px</span>`;
+      st.appendChild(box);
+      say(`Sahne ref ile yakalandı: genişlik ${w}px, yükseklik ${h}px`);
+      setTimeout(() => box.remove(), 3500);
+    }
+    let onlyWarm = false;
+
+    // Vue 3 uygulaması: görünür sol liste doğrudan Vue tarafından render edilir.
+    // v-for: biyomları listeler | v-if: boş sonuç mesajı | v-show: arama ipucu.
+    // computed: arama ve sıcaklık filtresi | watch: seçili biyom değişimi.
+    const vueListApi = {
+      setSearch: (value) => { vueListState.searchQuery = value; },
+      setFilter: (value) => { vueListState.warmOnly = value; },
+      setSelected: (value) => { vueListState.selectedName = value; }
+    };
+    window.vueBiomeList = vueListApi;
+    window.vueListInstance = Vue.createApp({
+      setup() {
+        const listRoot = Vue.ref(null); // template ref
+        const filteredBiomes = Vue.computed(() => planets.filter(p => {
+          const matchesText = p.name.toLocaleLowerCase('tr').includes(vueListState.searchQuery.toLocaleLowerCase('tr'));
+          const matchesWarm = !vueListState.warmOnly || !(parseInt(p.temp) >= 20);
+          return matchesText && matchesWarm;
+        }));
+        Vue.watch(() => vueListState.selectedName, (name, oldName, onCleanup) => {
+          // Watcher + onCleanup: yeni seçimde eski istek iptal edilir.
+          const status = document.getElementById('watchStatus');
+          if (!status) return;
+          status.textContent = '⏳ Yükleniyor…'; status.style.color = '#fbbf24';
+          const t = setTimeout(() => { status.textContent = `✅ Hazır: ${name}`; status.style.color = '#a3e635'; }, 700);
+          onCleanup(() => clearTimeout(t));
+        });
+        Vue.onMounted(() => {
+          // onMounted: bileşen DOM'a yerleşti.
+          if (listRoot.value) listRoot.value.setAttribute('data-vue-mounted', 'true');
+        });
+        Vue.onUpdated(() => {
+          // onUpdated: arama veya filtre değişince liste güncellendi.
+          if (listRoot.value) listRoot.value.setAttribute('data-vue-updated', 'true');
+        });
+        Vue.onUnmounted(() => {
+          const status = document.getElementById('watchStatus');
+          if (status) status.textContent = 'Vue listesi kaldırıldı';
+        });
+        return {
+          listRoot, filteredBiomes, vueListState,
+          chooseBiome: (biome) => window.selectBiomeFromVue(biome)
+        };
+      },
+      template: `
+        <div class="planetlist-inner" ref="listRoot">
+          <template v-for="biome in filteredBiomes" :key="biome.name">
+          <button
+            class="planet" :class="{ active: vueListState.selectedName === biome.name }"
+            @click="chooseBiome(biome)">
+            <span class="orb" :class="'b-' + biome.cls"></span>{{ biome.name }}
+          </button>
+          </template>
+          <div v-if="filteredBiomes.length === 0" class="muted text-xs p-2">Eşleşen biyom bulunamadı.</div>
+          <span v-show="vueListState.searchQuery" class="sr-only">Arama filtresi etkin</span>
+        </div>`
+    }).mount('#planetlist');
+
+    const tempNum = t => parseInt(String(t).replace('−', '-'));
+    Vue.createApp({
+      setup() {
+        const biomeIndex = Vue.computed(() => planets.findIndex(p => p.name === vueListState.selectedName));
+        return { detailState, planets, biomeIndex, tempNum };
+      },
+      template: `
+        <button class="detail" id="detail" @click="detailState.open = !detailState.open">
+          {{ detailState.open ? 'Detayı gizle ↑' : 'Detaylı Bilgi →' }}
+        </button>
+        <p v-if="tempNum(detailState.temp) >= 30" class="muted text-xs mt-2">🔥 Sıcak iklim</p>
+        <p v-else-if="tempNum(detailState.temp) >= 10" class="muted text-xs mt-2">🌤 Ilıman iklim</p>
+        <p v-else class="muted text-xs mt-2">❄ Soğuk iklim</p>
+        <p v-show="detailState.open" id="extra" class="muted mt-2 p-2 bg-slate-900 rounded border border-lime-500/30 text-xs">{{ detailState.text }}</p>
+        <div class="mt-2 text-xs">
+          <span v-for="n in planets.length" :key="n" :style="{ color: n - 1 === biomeIndex ? '#a3e635' : '#475569' }">●</span>
+        </div>`
+    }).mount('#conditional-render-zone');
+    window.selectBiomeFromVue = (biome) => selectPlanet(biome);
+    function visiblePlanets() { return onlyWarm ? planets.filter(p => !(parseInt(p.temp) >= 20)) : planets; }
+
+    // Pinia benzeri merkezi store (Proxy ile reaktif)
+    // Vue 3 reactive merkezi durum (Pinia mantığına hazırlık).
+    Vue.watch(() => store.activeBiome, (value) => {
+      const view = document.getElementById('storeView');
+      const chip = document.getElementById('storeChip');
+      if (view) view.textContent = `Aktif biyom: ${value}`;
+      if (chip) chip.textContent = `📍 ${value}`;
+    }, { immediate: true });
+
+    function relStage() {
+      const st = document.getElementById('stage');
+      if (getComputedStyle(st).position === 'static') st.style.position = 'relative';
+      return st;
+    }
+
+    // 1) v-if vs v-show: iki ayrı eleman, durum paneli ile görünür karşılaştırma
+    function updateCond() {}
+
+    // 2) v-for: mutasyon metodu + computed benzeri filtre
+    function warmDemo() {
+      onlyWarm = !onlyWarm; renderPlanets();
+      say(onlyWarm ? `Sıcak biyomlar gizlendi (${visiblePlanets().length}/${planets.length} görünüyor).` : 'Tüm biyomlar gösteriliyor.');
+    }
+
+    // 4) ref: setup anında null, onMounted sonrası gerçek DOM
+    function refFocusDemo() {
+      const input = window.aramaKutusuRef && window.aramaKutusuRef.value;
+      if (!input) return;
+      input.focus();
+      input.select();
+      input.style.boxShadow = '0 0 0 3px #a3e635';
+      setTimeout(() => input.style.boxShadow = '', 1800);
+      // Bu demoda ekrana toast/bildirim yazısı çıkarılmaz.
+    }
+
+    // 5) Yaşam döngüsü: biyom sahnesi tohumdan yaprağa doğar, büyür, solar
+    let lcRunning = false;
+    function lifecycleDemo() {
+      if (lcRunning) return; lcRunning = true;
+      const st = relStage(), solar = document.querySelector('.solar');
+      const orig = activePlanet;
+      const i = planets.findIndex(p => p.name === orig.name);
+      const next = planets[(i + 1) % planets.length];
+      const labels = ['Kurulum', 'Montaj öncesi', 'Montaj', 'Güncelleme öncesi', 'Güncelleme', 'Söküm öncesi', 'Söküm'];
+      const icons = ['🌰', '🌱', '🌿', '🌿', '🌳', '🍂', '🍃'];
+      const scales = [0.7, 0.9, 1.1, 1.3, 1.5, 1.1, 0.6];
+      ['lcBar', 'lcIcon'].forEach(id => { const o = document.getElementById(id); if (o) o.remove(); });
+      const bar = document.createElement('div'); bar.id = 'lcBar';
+      bar.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);padding:8px 16px;background:rgba(15,23,42,.92);border:1px solid #a3e635;border-radius:12px;color:#d9f99d;font-size:14px;text-align:center;z-index:7;white-space:nowrap';
+      const icon = document.createElement('div'); icon.id = 'lcIcon';
+      icon.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.5);font-size:84px;line-height:1;z-index:6;pointer-events:none;transition:transform .8s ease,opacity .6s;filter:drop-shadow(0 0 18px rgba(163,230,53,.6))';
+      st.appendChild(bar); st.appendChild(icon);
+      solar.style.transition = 'opacity .6s';
+      const show = k => {
+        const dots = labels.map((_, j) => `<span style="display:inline-block;width:10px;height:10px;margin:0 3px;border-radius:50%;background:${j === k ? '#a3e635' : j < k ? '#4d7c0f' : '#334155'}"></span>`).join('');
+        bar.innerHTML = `<div>${dots}</div><div><b>${k + 1}. ${labels[k]}</b></div>`;
+        icon.textContent = icons[k];
+        icon.style.transform = `translate(-50%,-50%) scale(${scales[k]})`;
+        icon.style.opacity = k === 6 ? '0.5' : '1';
+      };
+      const steps = [
+        () => { solar.style.opacity = '0'; show(0); },
+        () => show(1),
+        () => { solar.style.opacity = '1'; show(2); },
+        () => show(3),
+        () => { selectPlanet(next); show(4); },
+        () => show(5),
+        () => {
+          solar.style.opacity = '0'; show(6);
+          setTimeout(() => { solar.style.opacity = '1'; selectPlanet(orig); bar.remove(); icon.remove(); lcRunning = false; }, 1800);
+        }
+      ];
+      steps.forEach((fn, k) => setTimeout(fn, k * 1800));
+    }
+
+    // 6) Store: tek kaynak, prop drilling yok
+    function storeDemo() {
+      const i = planets.findIndex(p => p.name === activePlanet.name);
+      selectPlanet(planets[(i + 1) % planets.length]);
+    }
+    function readBiome() {
+      const el = document.getElementById('storeView');
+      el.textContent = `Aktif biyom: ${activePlanet.name} · ${activePlanet.temp} · ${activePlanet.year}`;
+      const card = document.getElementById('target-store-card');
+      card.style.boxShadow = '0 0 0 3px #a3e635'; setTimeout(() => { card.style.boxShadow = ''; }, 1500);
+    }
+
+    const _b = (fn, label) => `<button class="btn primary text-xs py-1 px-2" onclick="${fn}">${label}</button>`;
+    const extraActions = {
+      2: _b('warmDemo()', 'Sıcak Biyomları Gizle/Göster'),
+      4: _b('refFocusDemo()', 'Arama Kutusuna Odaklan'),
+      5: _b('lifecycleDemo()', '▶ Yaşam Döngüsünü Oynat'),
+      6: _b('storeDemo()', 'Sıradaki Biyom')
+    };
+
+    // PILL CLICK EVENTS
+    document.querySelectorAll('.pill-btn').forEach(btn => {
+      btn.onclick = () => showTopicAnnotation(btn.dataset.topic);
+    });
+
+    // INITIAL LOAD
+    window.onload = function() {
+      renderPlanets();
+      selectPlanet(planets[0]); // Default Çöl
+      updateCond();
+      
+      // Show concept 1 annotation by default on load
+      setTimeout(() => {
+        showTopicAnnotation(1);
+      }, 500);
+    };
+
+    // RE-POSITION BADGE ON WINDOW RESIZE
+    window.onresize = function() {
+      const activePill = document.querySelector('.pill-btn.active');
+      if (activePill) showTopicAnnotation(activePill.dataset.topic);
+    };
+  </script>
+</body>
+</html>
